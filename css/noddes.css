@@ -1,0 +1,73 @@
+body{
+	padding:0;
+	margin:0;
+	box-sizing: border-box;
+	min-height:100%;
+	width: 100%;
+	height: 100%;
+	position: relative;
+	overflow: hidden;
+}
+.NodesPanelWrapper{
+	display: flex;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	transform: translateZ(0);
+	height: 50vh;
+	width: 100vw;
+}
+.NodesPanel{
+	height: 10599.5px;
+	width: 4451.5px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	-ms-flex-preferred-size: 100% !important;
+	flex-basis: 100% !important;
+	will-change: transform;
+	background-color: rgb(210, 210, 210);
+	/* Disable highlight */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.NodesContainer{
+	height: 1000px;
+	width: 1400px;
+	/*left: 22px;
+	top: 52px;*/
+	z-index: auto;
+	mix-blend-mode: normal;
+	background-color: rgb(255, 255, 255);
+	background-image: none;
+	background-size: cover;
+	background-repeat: repeat;
+	background-position: center center;
+}
+.NodeBox{
+	opacity: 1; 
+	mix-blend-mode: normal; 
+	background-color: rgb(235, 235, 235); 
+	background-image: none; 
+	background-position: center center; 
+	background-repeat: repeat; 
+	background-size: cover; 
+	border-radius: 0px; 
+	border-width: 0px; 
+	border-color: rgb(102, 102, 102); 
+	border-style: solid; 
+	text-align:center;
+	padding:10px; 
+	width: 100px; 
+	height: auto;
+	font-size:12px;
+}
