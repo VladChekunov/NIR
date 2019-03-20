@@ -2,6 +2,7 @@ var noddes = {
 	init:function(data){
 		console.log("Init");
 		noddes.initEvents();
+		noddes.renderData();
 	},
 	initEvents:function(){
 		noddes.initKeyboard();
@@ -12,12 +13,65 @@ var noddes = {
 		//Touchpad
 		document.addEventListener('touchstart', noddes.events.move);
 		document.addEventListener('touchmove', noddes.events.move);
-		document.addEventListener('touchend', noddes.events.move);/*function(e){
+		document.addEventListener('touchend', noddes.events.move);
+		document.body.addEventListener("wheel", noddes.events.scroll)
 			
-		});*/
+		document.childNodes[1].focus();
 		
 	},
+	renderData:function(){//Render Data on NodeTree		
+		for(var i = 0; i<noddes.data.length;i++){
+			newNode = document.createElement("div");
+			newNode.innerHTML=noddes.data[i].name;
+			newNode.style.background=noddes.data[i].color;
+			newNode.className="NodeBox";
+			newNode.setAttribute("data-id", noddes.data[i].id);
+			newNode.style.transform="rotate(0deg) translate("+noddes.data[i].x+"px, "+noddes.data[i].y+"px)";
+
+			document.getElementsByClassName("NodesContainer")[0].appendChild(newNode);
+		}
+		noddes.reRenderData();
+	},
+	reRenderData:function(e){
+
+		noddes.states.nodesViewport.x=parseInt(document.getElementById("NodesPanel").children[0].style.marginLeft);
+		noddes.states.nodesViewport.y=parseInt(document.getElementById("NodesPanel").children[0].style.marginTop);
+		centerx = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetWidth/2);
+		centery = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetHeight/2);
+
+		//scale Canvas
+		document.getElementsByClassName("NodesContainer")[0].style.width=(1400*noddes.states.nodesViewport.z)+"px";
+		document.getElementsByClassName("NodesContainer")[0].style.height=(1000*noddes.states.nodesViewport.z)+"px";
+		//Move Nodes
+		for(var i = 0;i<document.getElementsByClassName("NodeBox").length;i++){
+			for(var j=0;j<noddes.data.length;j++){
+				if(noddes.data[j].id==document.getElementsByClassName("NodeBox")[i].getAttribute("data-id")){
+					document.getElementsByClassName("NodeBox")[i].style.transform="rotate(0deg) translate("+noddes.states.nodesViewport.z*noddes.data[j].x+"px, "+noddes.states.nodesViewport.z*noddes.data[j].y+"px)";
+				}
+			}
+		}
+
+
+		if(1000*noddes.states.nodesViewport.z>1){
+			//newx = 1200;
+			//newy = 1200;
+		}else{//menshe
+			//newx = 200;
+			//newy = 200;
+		}
+		document.getElementById("NodesPanel").children[0].style.marginLeft=newx+"px";
+		document.getElementById("NodesPanel").children[0].style.marginTop=newy+"px";
+		//Center
+	},
 	events:{
+		zoomplus:function(e){
+			noddes.states.nodesViewport.z+=0.1;
+			noddes.reRenderData(e);
+		},
+		zoomminus:function(e){
+			noddes.states.nodesViewport.z-=0.1;
+			noddes.reRenderData(e);
+		},
 		startmove:function(e){
 			console.log('down');
 			
@@ -33,6 +87,19 @@ var noddes = {
 				noddes.changeCursor("move");
 			}
 		},
+		scroll:function(e){
+				e.preventDefault();
+				if(noddes.states.keyboardState.ctkey){
+					if(e.deltaY>0){//up
+						noddes.events.zoomminus(e);
+						return false;
+					}else if(e.deltaY<0){//down
+						noddes.events.zoomplus(e);
+						return false;
+					}
+				}
+				return false;
+		},
 		move:function(e){
 			if(noddes.states.actionState.move){
 				newx = noddes.states.nodesViewport.x+(-1)*(noddes.states.actionState.moveStart.x-e.clientX);
@@ -40,7 +107,7 @@ var noddes = {
 				//console.log("Мы двигаем на "+newx+" и "+newy);
 				//Учесть Scale
 
-				if(newx*noddes.states.nodesViewport.z < 1500 && newx*noddes.states.nodesViewport.z > -1500 && newy*noddes.states.nodesViewport.z < 1500 && newy*noddes.states.nodesViewport.z > -1500){
+				if(newx < 1500*noddes.states.nodesViewport.z && newx > -1500*noddes.states.nodesViewport.z && newy < 1500*noddes.states.nodesViewport.z && newy > -1500*noddes.states.nodesViewport.z){
 					document.getElementById("NodesPanel").children[0].style.marginLeft=newx+"px";
 					document.getElementById("NodesPanel").children[0].style.marginTop=newy+"px";
 				}
@@ -58,23 +125,35 @@ var noddes = {
 	},
 	initKeyboard:function(){
 		document.addEventListener('keydown', function(e){
+			console.log(e);
+			//173 61
 			switch(e.keyCode){
-				case 17: 
+				case 61: // -_
+					if(noddes.states.keyboardState.alkey){
+						noddes.events.zoomplus(e);
+					}
+				break;
+				case 173: // =+
+					if(noddes.states.keyboardState.alkey){
+						noddes.events.zoomminus(e);
+					}
+				break;
+				case 17: // ctrl
 					if(!noddes.states.keyboardState.spkey){
 						noddes.states.keyboardState.ctkey=true;
 					}
 				break;
-				case 18: 
+				case 18: // alt
 					if(!noddes.states.keyboardState.spkey){
 						noddes.states.keyboardState.alkey=true;
 					}
 				break;
-				case 16: 
+				case 16: // shift
 					if(!noddes.states.keyboardState.spkey){
 						noddes.states.keyboardState.shkey=true;
 					}
 				break;
-				case 32: 
+				case 32: // space
 					if(!noddes.states.keyboardState.spkey){
 						noddes.states.keyboardState.spkey=true;
 						noddes.changeCursor("grab");
@@ -104,8 +183,10 @@ var noddes = {
 	},
 	data:[
 		{
+			id:213,
 			type:"text",
 			color:"#fff000",
+			name:"Sample Text Node",
 			x:335,
 			y:169,
 			//...
@@ -114,7 +195,26 @@ var noddes = {
 				font:"Arial",
 				//...
 				size:"20"
-			}
+			},
+			inputs:[],
+			cache:null
+		},
+		{
+			id:21,
+			type:"image",
+			color:"#fff000",
+			name:"Sample Image",
+			x:635,
+			y:10,
+			//...
+			data:{
+				text:"Hello World",
+				font:"Arial",
+				//...
+				size:"20"
+			},
+			inputs:[],
+			cache:null
 		}
 	],
 	states:{

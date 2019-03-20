@@ -41,8 +41,8 @@ body{
 	user-select: none;
 }
 .NodesContainer{
-	height: 1000px;
-	width: 1400px;
+	/*height: 1000px;
+	width: 1400px;*/
 	/*left: 22px;
 	top: 52px;*/
 	z-index: auto;
@@ -70,4 +70,5 @@ body{
 	width: 100px; 
 	height: auto;
 	font-size:12px;
+	position: absolute;
 }
