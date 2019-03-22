@@ -14,7 +14,7 @@ var noddes = {
 		document.addEventListener('touchstart', noddes.events.move);
 		document.addEventListener('touchmove', noddes.events.move);
 		document.addEventListener('touchend', noddes.events.move);
-		document.body.addEventListener("wheel", noddes.events.scroll)
+		document.body.addEventListener("wheel", noddes.events.scroll);
 			
 		document.childNodes[1].focus();
 		
@@ -34,10 +34,8 @@ var noddes = {
 	},
 	reRenderData:function(e){
 
-		noddes.states.nodesViewport.x=parseInt(document.getElementById("NodesPanel").children[0].style.marginLeft);
-		noddes.states.nodesViewport.y=parseInt(document.getElementById("NodesPanel").children[0].style.marginTop);
-		centerx = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetWidth/2);
-		centery = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetHeight/2);
+		document.getElementById("NodesPanel").children[0].style.marginLeft = noddes.states.nodesViewport.x+"px";//=;
+		document.getElementById("NodesPanel").children[0].style.marginTop = noddes.states.nodesViewport.y+"px";//=parseInt();
 
 		//scale Canvas
 		document.getElementsByClassName("NodesContainer")[0].style.width=(1400*noddes.states.nodesViewport.z)+"px";
@@ -59,17 +57,35 @@ var noddes = {
 			//newx = 200;
 			//newy = 200;
 		}
-		document.getElementById("NodesPanel").children[0].style.marginLeft=newx+"px";
-		document.getElementById("NodesPanel").children[0].style.marginTop=newy+"px";
+		//document.getElementById("NodesPanel").children[0].style.marginLeft=newx+"px";
+		//document.getElementById("NodesPanel").children[0].style.marginTop=newy+"px";
 		//Center
 	},
 	events:{
 		zoomplus:function(e){
 			noddes.states.nodesViewport.z+=0.1;
+
+			deltax = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetWidth/2)-noddes.states.nodesViewport.x;
+			deltay = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetHeight/2)-noddes.states.nodesViewport.y;
+
+			//console.log("cx: "+centerx+", cy: "+centery+"\nax: "+noddes.states.nodesViewport.x+", ay: "+noddes.states.nodesViewport.y+"\ndx: "+deltax+", dy: "+deltay)
+			
+			noddes.states.nodesViewport.x -= deltax*0.1;
+			noddes.states.nodesViewport.y -= deltay*0.1;
+
 			noddes.reRenderData(e);
 		},
 		zoomminus:function(e){
 			noddes.states.nodesViewport.z-=0.1;
+
+			deltax = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetWidth/2)-noddes.states.nodesViewport.x;
+			deltay = Math.ceil(document.getElementsByClassName("NodesPanelWrapper")[0].offsetHeight/2)-noddes.states.nodesViewport.y;
+
+			//console.log("cx: "+centerx+", cy: "+centery+"\nax: "+noddes.states.nodesViewport.x+", ay: "+noddes.states.nodesViewport.y+"\ndx: "+deltax+", dy: "+deltay)
+			
+			noddes.states.nodesViewport.x += deltax*0.1;
+			noddes.states.nodesViewport.y += deltay*0.1;
+
 			noddes.reRenderData(e);
 		},
 		startmove:function(e){
@@ -121,6 +137,8 @@ var noddes = {
 				noddes.states.actionState.move=false;
 				noddes.changeCursor("grab");
 			}
+			noddes.states.nodesViewport.x = parseInt(document.getElementById("NodesPanel").children[0].style.marginLeft);
+			noddes.states.nodesViewport.y = parseInt(document.getElementById("NodesPanel").children[0].style.marginTop);
 		}
 	},
 	initKeyboard:function(){

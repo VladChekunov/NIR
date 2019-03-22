@@ -8,13 +8,14 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 * **Nodes View**
 	* ~~View~~
 	* ~~Move~~
-	* Scale
-	* Rulers
-	* Nodes
-		* Color
-		* Name
-		* LoadData
+	* ~~Scale~~
+	* ~~Nodes~~
+		* ~~Color~~
+		* ~~Name~~
+		* ~~LoadData~~
+		* Links
 	* LoadData
+	* Rulers
 * Props View
 	* Nodes Types
 	* Props types
@@ -25,4 +26,5 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
  * Tools Panel
  	* Move Tool
  	* Scale Tool
- 	* Add Node
+ 	* Add Node Tool
+ * Menu Panel
