@@ -29,6 +29,38 @@ var noddes = {
 			newNode.style.transform="rotate(0deg) translate("+noddes.data[i].x+"px, "+noddes.data[i].y+"px)";
 
 			document.getElementsByClassName("NodesContainer")[0].appendChild(newNode);
+			for(var j = 0; j<noddes.data[i].inputs.length;j++){
+				newLink = document.createElement("div");
+
+				fromId=noddes.data[i].id;
+				fromIndex=i;
+				toId=noddes.data[i].inputs[j];//
+				toIndex=noddes.nodes.getIndexById(toId);
+
+				newLink.setAttribute("from-id", fromId);
+				newLink.setAttribute("to-id", toId);
+				newLink.className="NodeLine";
+
+				xStart = noddes.data[toIndex].x+50;
+				yStart = noddes.data[toIndex].y+20;
+
+				linkWidth = noddes.data[fromIndex].x-noddes.data[toIndex].x;
+				linkHeight = noddes.data[fromIndex].y-noddes.data[toIndex].y;
+				if(linkWidth<2 && linkWidth>-2){
+					linkWidth=2;
+				}
+				if(linkHeight<2 && linkHeight>-2){
+					linkHeight=2;
+				}
+				
+
+				newLink.innerHTML='<svg version="1.2" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="overflow: visible; width: '+linkWidth+'px; height: '+linkHeight+'px; opacity: 1; mix-blend-mode: normal;" viewBox="0 0 '+linkWidth+' '+linkHeight+'"><defs></defs><g><path style="stroke: rgb(0, 0, 0); stroke-width: 1; stroke-linecap: butt; stroke-linejoin: miter; fill: none;" d="M'+xStart+' '+yStart+' l'+linkWidth+' '+linkHeight+'"></path></g></svg>';
+				document.getElementsByClassName("NodesContainer")[0].appendChild(newLink);
+				
+
+				console.log("line "+noddes.data[fromIndex].name+" - "+noddes.data[toIndex].name);
+			
+			}
 		}
 		noddes.reRenderData();
 	},
@@ -48,18 +80,34 @@ var noddes = {
 				}
 			}
 		}
+		for(var i = 0;i<document.getElementsByClassName("NodeLine").length;i++){
+			//get FromId and ToId
+			fromId = document.getElementsByClassName("NodeLine")[i].getAttribute("from-id");
+			fromIndex = noddes.nodes.getIndexById(fromId);
+			toId = document.getElementsByClassName("NodeLine")[i].getAttribute("to-id");
+			toIndex = noddes.nodes.getIndexById(toId);
+			
 
+			xStart = noddes.states.nodesViewport.z*noddes.data[toIndex].x+50;
+			yStart = noddes.states.nodesViewport.z*noddes.data[toIndex].y+20;
+			console.log(xStart+"_"+yStart);
+			linkWidth = (noddes.data[fromIndex].x-noddes.data[toIndex].x)*noddes.states.nodesViewport.z;
+			linkHeight = (noddes.data[fromIndex].y-noddes.data[toIndex].y)*noddes.states.nodesViewport.z;
 
-		if(1000*noddes.states.nodesViewport.z>1){
-			//newx = 1200;
-			//newy = 1200;
-		}else{//menshe
-			//newx = 200;
-			//newy = 200;
+			if(linkWidth<2 && linkWidth>-2){
+				linkWidth=2;
+			}
+			if(linkHeight<2 && linkHeight>-2){
+				linkHeight=2;
+			}
+			console.log(linkWidth+"_"+linkHeight);
+			//change coords in 8 places
+			document.getElementsByClassName("NodeLine")[i].children[0].style.width=linkWidth+"px";
+			document.getElementsByClassName("NodeLine")[i].children[0].style.height=linkHeight+"px";
+			document.getElementsByClassName("NodeLine")[i].children[0].setAttribute("viewBox","0 0 "+linkWidth+" "+linkHeight);
+			document.getElementsByClassName("NodeLine")[i].children[0].children[1].children[0].setAttribute("d","M"+xStart+" "+yStart+" l "+linkWidth+" "+linkHeight);
+			
 		}
-		//document.getElementById("NodesPanel").children[0].style.marginLeft=newx+"px";
-		//document.getElementById("NodesPanel").children[0].style.marginTop=newy+"px";
-		//Center
 	},
 	events:{
 		zoomplus:function(e){
@@ -199,14 +247,51 @@ var noddes = {
 		}
 		console.log("Курсор: "+cursorType)
 	},
+	nodes:{
+		getIndexById:function(nid){
+			for(var i = 0;i<noddes.data.length;i++){
+				if(noddes.data[i].id==nid){
+					return i;
+				}
+			}
+			return -1;
+		}
+	},
 	data:[
+		{
+			id:0,
+			type:"view",
+			color:"#ff0000",
+			name:"View Node",
+			x:435,
+			y:335,
+			data:{
+				
+			},
+			inputs:[22],
+			cache:null
+		},
+		{
+			id:22,
+			type:"marge",
+			color:"#fff000",
+			name:"merge",
+			x:435,
+			y:229,
+			//...
+			data:{
+				mode:0
+			},
+			inputs:[21,213],
+			cache:null
+		},
 		{
 			id:213,
 			type:"text",
 			color:"#fff000",
 			name:"Sample Text Node",
 			x:335,
-			y:169,
+			y:49,
 			//...
 			data:{
 				text:"Hello World",
@@ -226,10 +311,9 @@ var noddes = {
 			y:10,
 			//...
 			data:{
-				text:"Hello World",
-				font:"Arial",
+				source:"Hello World",
 				//...
-				size:"20"
+				format:"png"
 			},
 			inputs:[],
 			cache:null

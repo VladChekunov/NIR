@@ -54,6 +54,7 @@ body{
 	background-position: center center;
 }
 .NodeBox{
+	z-index:1;
 	opacity: 1; 
 	mix-blend-mode: normal; 
 	background-color: rgb(235, 235, 235); 
@@ -71,4 +72,9 @@ body{
 	height: auto;
 	font-size:12px;
 	position: absolute;
+}
+.NodeLine{
+	z-index:0;
+	position: absolute;
+	display:block;
 }

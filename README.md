@@ -13,8 +13,12 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 		* ~~Color~~
 		* ~~Name~~
 		* ~~LoadData~~
-		* Links
-	* LoadData
+		* ~~Links~~
+		* Select
+		* Move
+		* Remove
+		* Duplicate
+	* ~~LoadData~~
 	* Rulers
 * Props View
 	* Nodes Types
