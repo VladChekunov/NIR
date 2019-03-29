@@ -22,6 +22,33 @@ body{
 	height: 50vh;
 	width: 100vw;
 }
+
+.ToolsPanelWrapper{
+	display:flex;
+	position:absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	ms-flex-direction:column;
+	flex-direction: column;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	transform: translateZ(0);
+	height:100vh;
+	width:32px;
+	background-color:#888888;
+	z-index:99;
+}
+.ToolsContainer a{
+	display:block;
+	background:#777777;
+	width:32px;
+	height:32px;
+	border:solid 1px #666666;
+	color:#ffffff;
+	text-align:center;
+	padding-top:16px;
+}
 .NodesPanel{
 	height: 10599.5px;
 	width: 4451.5px;
@@ -78,3 +105,6 @@ body{
 	position: absolute;
 	display:block;
 }
+.
+
+
