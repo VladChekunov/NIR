@@ -17,6 +17,13 @@ var noddes = {
 		document.body.addEventListener("wheel", noddes.events.scroll);
 			
 		document.childNodes[1].focus();
+		//Toolbar
+		for(var i = 0; i<document.getElementsByClassName("ToolsContainer")[0].children.length;i++){
+			
+			document.getElementsByClassName("ToolsContainer")[0].children[i].addEventListener('click', function(){
+				alert("Test");
+			});
+		}
 		
 	},
 	renderData:function(){//Render Data on NodeTree		
@@ -327,6 +334,7 @@ var noddes = {
 			spkey:false
 		},
 		actionState:{
+			action: "default",
 			move:false,//Перемещение по холсту
 			moveStart:{
 				x:null,
