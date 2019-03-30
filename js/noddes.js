@@ -199,7 +199,6 @@ var noddes = {
 	initKeyboard:function(){
 		document.addEventListener('keydown', function(e){
 			console.log(e);
-			//173 61
 			switch(e.keyCode){
 				case 61: // -_
 					if(noddes.states.keyboardState.alkey){
