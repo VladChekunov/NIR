@@ -199,7 +199,17 @@ var noddes = {
 						noddes.events.zoomplus(e);
 					}
 				break;
+				case 187: // -_
+					if(noddes.states.keyboardState.alkey){
+						noddes.events.zoomplus(e);
+					}
+				break;
 				case 173: // =+
+					if(noddes.states.keyboardState.alkey){
+						noddes.events.zoomminus(e);
+					}
+				break;
+				case 189: // =+
 					if(noddes.states.keyboardState.alkey){
 						noddes.events.zoomminus(e);
 					}
