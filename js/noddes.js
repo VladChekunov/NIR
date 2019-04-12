@@ -19,10 +19,13 @@ var noddes = {
 		document.childNodes[1].focus();
 		//Toolbar
 		for(var i = 0; i<document.getElementsByClassName("ToolsContainer")[0].children.length;i++){
-			
-			document.getElementsByClassName("ToolsContainer")[0].children[i].addEventListener('click', function(){
-				alert("Test");
-			});
+			let iter = i;
+			document.getElementsByClassName("ToolsContainer")[0].children[i].addEventListener('click', 
+				(function(e){
+					iter = iter;
+					noddes.events.changetool(iter);
+				})
+			);
 		}
 		
 	},
@@ -117,6 +120,12 @@ var noddes = {
 		}
 	},
 	events:{
+		changetool:function(index){
+			noddes.states.actionState.action = noddes.tools.toolsList[index];
+			
+			noddes.changeCursor(noddes.tools.cursorsList[index]);
+			//alert()
+		},
 		zoomplus:function(e){
 			noddes.states.nodesViewport.z+=0.1;
 
@@ -146,7 +155,8 @@ var noddes = {
 		startmove:function(e){
 			console.log('down');
 			
-			if(noddes.states.keyboardState.spkey){
+			if(noddes.states.keyboardState.spkey || noddes.states.actionState.action=="move"){
+				//Move action
 				noddes.states.actionState.move=true;
 				console.log("Init start")
 				noddes.states.actionState.moveStart={
@@ -188,7 +198,7 @@ var noddes = {
 		},
 		endmove:function(e){
 			console.log('up');
-			if(noddes.states.keyboardState.spkey){
+			if(noddes.states.keyboardState.spkey || noddes.states.actionState.action=="move"){
 				noddes.states.actionState.move=false;
 				noddes.changeCursor("grab");
 			}
@@ -209,7 +219,7 @@ var noddes = {
 					if(noddes.states.keyboardState.alkey){
 						noddes.events.zoomplus(e);
 					}
-				break;
+					break;
 				case 173: // =+
 					if(noddes.states.keyboardState.alkey){
 						noddes.events.zoomminus(e);
@@ -255,6 +265,20 @@ var noddes = {
 			}
 		}, false);
 
+	},
+	tools:{
+		toolsList:[
+			"cursor", 
+			"move", 
+			"zoom", 
+			"add"
+		],
+		cursorsList:[
+			"default",
+			"grab",
+			"zoom-in",
+			"copy"
+		]
 	},
 	changeCursor:function(cursorType){
 		document.getElementById("NodesPanel").style.cursor=cursorType;
@@ -342,8 +366,11 @@ var noddes = {
 			shkey:false,
 			spkey:false
 		},
+		toolsState:{
+			active:"cursor"
+		},
 		actionState:{
-			action: "default",
+			action: "cursor",
 			move:false,//Перемещение по холсту
 			moveStart:{
 				x:null,
