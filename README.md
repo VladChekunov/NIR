@@ -27,8 +27,8 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 	* View
 	* Move
 	* Scale
- * Tools Panel
- 	* Move Tool
- 	* Scale Tool
- 	* Add Node Tool
+ * ~~Tools Panel~~
+ 	* ~~Move Tool~~
+ 	* ~~Scale Tool~~
+ 	* ~~Add Node Tool~~
  * Menu Panel

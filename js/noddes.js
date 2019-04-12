@@ -166,6 +166,16 @@ var noddes = {
 				noddes.states.nodesViewport.x=parseInt(document.getElementById("NodesPanel").children[0].style.marginLeft)
 				noddes.states.nodesViewport.y=parseInt(document.getElementById("NodesPanel").children[0].style.marginTop)
 				noddes.changeCursor("move");
+			}else if(noddes.states.actionState.action=="zoom"){
+				if(noddes.states.keyboardState.ctkey){
+					//-
+					noddes.events.zoomminus(e);
+					//alert(0);
+				}else{
+					//+
+					noddes.events.zoomplus(e);
+				}
+				//alert("zoom");
 			}
 		},
 		scroll:function(e){
