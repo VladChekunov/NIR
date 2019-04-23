@@ -11,7 +11,66 @@
 
 <script>
 window.onload=function(){
-	noddes.init();
+	noddes.init([{
+			id:0,
+			type:"view",
+			color:"#ff0000",
+			name:"View Node",
+			x:435,
+			y:335,
+			data:{
+				
+			},
+			inputs:[22],
+			cache:null
+		},
+		{
+			id:22,
+			type:"marge",
+			color:"#fff000",
+			name:"merge",
+			x:435,
+			y:229,
+			//...
+			data:{
+				mode:0
+			},
+			inputs:[21,213],
+			cache:null
+		},
+		{
+			id:213,
+			type:"text",
+			color:"#fff000",
+			name:"Sample Text Node",
+			x:335,
+			y:49,
+			//...
+			data:{
+				text:"Hello World",
+				font:"Arial",
+				//...
+				size:"20"
+			},
+			inputs:[],
+			cache:null
+		},
+		{
+			id:21,
+			type:"image",
+			color:"#fff000",
+			name:"Sample Image",
+			x:635,
+			y:10,
+			//...
+			data:{
+				source:"Hello World",
+				//...
+				format:"png"
+			},
+			inputs:[],
+			cache:null
+		}]);
 }
 </script>
 
@@ -42,6 +101,13 @@ window.onload=function(){
 	<div id="NodesPanel" class="NodesPanel">
 		<div class="NodesContainer" style="width:1400px;height:1000px;margin-left:22px; margin-top: 52px;">
 			
+		</div>
+	</div>
+</div>
+<div class="PropsPanelWrapper">
+	<div id="PropsPanel" class="PropsPanel">
+		<div class="PropsContainer">
+			Nothing selected.
 		</div>
 	</div>
 </div>

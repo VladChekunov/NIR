@@ -2,12 +2,15 @@ var noddes = {
 	init:function(data){
 		console.log("Init");
 		noddes.initEvents();
+		noddes.data = data;		
 		noddes.renderData();
+		
 	},
 	initEvents:function(){
 		noddes.initKeyboard();
 		//Mouse
 		document.addEventListener('mousedown', noddes.events.startmove);
+		document.addEventListener('click', noddes.events.startclick);
 		document.addEventListener('mousemove', noddes.events.move);
 		document.addEventListener('mouseup', noddes.events.endmove);
 		//Touchpad
@@ -120,6 +123,56 @@ var noddes = {
 		}
 	},
 	events:{
+		startclick:function(e){
+			if(noddes.states.actionState.action=="cursor"){
+				if(e.target.className=="NodesContainer" || e.target.parentNode.className=="NodesContainer" || e.target.parentNode.parentNode.parentNode.parentNode.className=="NodesContainer"){
+					if((!noddes.states.keyboardState.ctkey && !noddes.states.keyboardState.shkey) || e.target.className=="NodesContainer"){
+						//Clear selected list
+						noddes.props.clear();
+						noddes.selected=[];
+						for(var i = 0;i<document.getElementsByClassName("NodeBox").length;i++){
+							if(document.getElementsByClassName("NodeBox")[i].getAttribute("data-selected")=="true"){
+								document.getElementsByClassName("NodeBox")[i].removeAttribute("data-selected");
+							}
+						}
+						for(var i = 0;i<document.getElementsByClassName("NodeLine").length;i++){
+							if(document.getElementsByClassName("NodeLine")[i].getAttribute("data-selected")=="true"){
+								document.getElementsByClassName("NodeLine")[i].removeAttribute("data-selected");
+							}
+						}
+					}
+				
+					if(e.target.className=="NodeBox" && e.target.getAttribute("data-selected")==null){
+						e.target.setAttribute("data-selected", "true");
+						noddes.selected.push({
+							type: "node",
+							id: e.target.getAttribute("data-id")
+						});
+						if(noddes.selected.length==1){
+							//PropsNodes
+							noddes.props.open(e.target.getAttribute("data-id"));
+						}else{
+							noddes.props.stats();
+						}
+					}else if(e.target.tagName=="path" && e.target.parentNode.parentNode.parentNode.className=="NodeLine" && e.target.parentNode.parentNode.parentNode.getAttribute("data-selected")==null){
+						e.target.parentNode.parentNode.parentNode.setAttribute("data-selected", "true");
+						noddes.selected.push({
+							type: "line",
+							fromid: e.target.parentNode.parentNode.parentNode.getAttribute("from-id"),
+							toid: e.target.parentNode.parentNode.parentNode.getAttribute("to-id")
+						});
+						if(noddes.selected.length==1){
+							//PropsNodes
+							noddes.props.open(e.target.parentNode.parentNode.parentNode.getAttribute("to-id"));
+						}else{
+							noddes.props.stats();
+						}
+					}
+				}
+			}
+
+			console.log(e);
+		},
 		changetool:function(index){
 			noddes.states.actionState.action = noddes.tools.toolsList[index];
 			
@@ -154,7 +207,9 @@ var noddes = {
 		},
 		startmove:function(e){
 			console.log('down');
-			
+			if(noddes.states.actionState.action=="cursor" && true){//more of null obj
+				//
+			}
 			if(noddes.states.keyboardState.spkey || noddes.states.actionState.action=="move"){
 				//Move action
 				noddes.states.actionState.move=true;
@@ -276,6 +331,17 @@ var noddes = {
 		}, false);
 
 	},
+	props:{
+		open:function(nid){
+			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected Node";
+		},
+		stats:function(){
+			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected "+noddes.selected.length+" objects.";
+		},
+		clear:function(){
+			document.getElementsByClassName("PropsContainer")[0].innerHTML="Nothing selected.";
+		}
+	},
 	tools:{
 		toolsList:[
 			"cursor", 
@@ -307,68 +373,8 @@ var noddes = {
 			return -1;
 		}
 	},
-	data:[
-		{
-			id:0,
-			type:"view",
-			color:"#ff0000",
-			name:"View Node",
-			x:435,
-			y:335,
-			data:{
-				
-			},
-			inputs:[22],
-			cache:null
-		},
-		{
-			id:22,
-			type:"marge",
-			color:"#fff000",
-			name:"merge",
-			x:435,
-			y:229,
-			//...
-			data:{
-				mode:0
-			},
-			inputs:[21,213],
-			cache:null
-		},
-		{
-			id:213,
-			type:"text",
-			color:"#fff000",
-			name:"Sample Text Node",
-			x:335,
-			y:49,
-			//...
-			data:{
-				text:"Hello World",
-				font:"Arial",
-				//...
-				size:"20"
-			},
-			inputs:[],
-			cache:null
-		},
-		{
-			id:21,
-			type:"image",
-			color:"#fff000",
-			name:"Sample Image",
-			x:635,
-			y:10,
-			//...
-			data:{
-				source:"Hello World",
-				//...
-				format:"png"
-			},
-			inputs:[],
-			cache:null
-		}
-	],
+	selected:[],
+	data:[],
 	states:{
 		keyboardState:{
 			ctkey:false,
