@@ -331,9 +331,90 @@ var noddes = {
 		}, false);
 
 	},
+	types:{
+		
+	},
 	props:{
+		types:[//Types of nodes
+			"view",
+			"text",
+			"image",
+			"marge"
+		],
+		typesprops:[//Fields of nodes types
+			[//view
+				{
+					//
+				}
+			],
+			[//text
+				{
+					name: "Content",
+					type: "text",
+					def: "",//default value
+					propel: 0
+				//	min: 0,
+				//	max: 20,
+				//	...
+					//
+				},
+				{
+					name: "Font",
+					type: "font",
+					propel: 2
+				},
+				{
+					name: "Size",
+					type: "size",
+					unit: "px",
+					propel: 1
+				},
+			],
+			[//image
+				{
+					//
+				}
+			],
+			[//marge
+				{
+					//
+				}
+			]
+		],
+		propselslist:[
+			{//Text field
+				add:function(typeprop, val){
+					return typeprop.name+": <input value='"+val+"'>";
+				}
+			},
+			{//Numberic field
+				add:function(typeprop, val){
+					return typeprop.name+": <input type='number' value='"+val+"'>"+typeprop.unit;
+				}
+			},
+			{//Font field
+				add:function(typeprop, val){
+					return typeprop.name+": FontsList";
+				}
+			}
+		],
+		
+
 		open:function(nid){
-			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected Node";
+			var nodeIndex = noddes.nodes.getIndexById(nid);
+			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected Node "+nid+", type "+noddes.data[nodeIndex].type;
+			var nodeTypeId = -1;
+			
+			for(var i = 0;i<noddes.props.types.length;i++){
+				if(noddes.data[nodeIndex].type==noddes.props.types[i]){
+					nodeTypeId=i;
+				}
+			}
+			for(var i = 0;i<noddes.props.typesprops[nodeTypeId].length;i++){
+				el = noddes.props.typesprops[nodeTypeId][i];
+				console.log(noddes.props.typesprops[nodeTypeId][i].propel)
+				document.getElementsByClassName("PropsContainer")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].add(el, noddes.data[nodeIndex].data[el.type])+"</div>";
+			}
 		},
 		stats:function(){
 			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected "+noddes.selected.length+" objects.";
