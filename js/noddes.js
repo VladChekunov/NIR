@@ -2,6 +2,7 @@ var noddes = {
 	init:function(data){
 		console.log("Init");
 		noddes.initEvents();
+		noddes.types.checkDefaultTypes();
 		noddes.data = data;		
 		noddes.renderData();
 		
@@ -205,12 +206,30 @@ var noddes = {
 
 			noddes.reRenderData(e);
 		},
+		scroll:function(e){
+				e.preventDefault();
+				if(noddes.states.keyboardState.ctkey){
+					if(e.deltaY>0){//up
+						noddes.events.zoomminus(e);
+						return false;
+					}else if(e.deltaY<0){//down
+						noddes.events.zoomplus(e);
+						return false;
+					}
+				}
+				return false;
+		},
 		startmove:function(e){
 			console.log('down');
-			if(noddes.states.actionState.action=="cursor" && true){//more of null obj
-				//
-			}
-			if(noddes.states.keyboardState.spkey || noddes.states.actionState.action=="move"){
+			if(noddes.states.actionState.action=="cursor" && noddes.selected.length>0){//more of null obj
+				noddes.states.actionState.nodemove=true;
+				console.log("Start Move objects");
+				noddes.states.actionState.moveStart={
+					x:e.clientX,
+					y:e.clientY
+				};
+				noddes.changeCursor("move");
+			}else if(noddes.states.keyboardState.spkey || noddes.states.actionState.action=="move"){
 				//Move action
 				noddes.states.actionState.move=true;
 				console.log("Init start")
@@ -233,21 +252,25 @@ var noddes = {
 				//alert("zoom");
 			}
 		},
-		scroll:function(e){
-				e.preventDefault();
-				if(noddes.states.keyboardState.ctkey){
-					if(e.deltaY>0){//up
-						noddes.events.zoomminus(e);
-						return false;
-					}else if(e.deltaY<0){//down
-						noddes.events.zoomplus(e);
-						return false;
-					}
-				}
-				return false;
-		},
 		move:function(e){
-			if(noddes.states.actionState.move){
+			if(noddes.states.actionState.nodemove){
+				newx = (-1)*(noddes.states.actionState.moveStart.x-e.clientX);
+				newy = (-1)*(noddes.states.actionState.moveStart.y-e.clientY);
+				
+				selected = document.querySelectorAll('[data-selected=true]');
+				for(var i =0;i<selected.length;i++){
+					comp = getComputedStyle(document.querySelectorAll('[data-selected=true]')[i]).transform.split(", ");
+					//newx += ;
+					//newy += ;
+					//console.log(newx+" "+newy);
+					document.querySelectorAll('[data-selected=true]')[i].style.transform="rotate(0deg) translate("+(newx+parseInt(comp[4]))+"px, "+(newy+parseInt(comp[5]))+"px)";
+				}
+				//TODO Move all links in loop
+				noddes.states.actionState.moveStart={
+					x:e.clientX,
+					y:e.clientY
+				};
+			}else if(noddes.states.actionState.move){
 				newx = noddes.states.nodesViewport.x+(-1)*(noddes.states.actionState.moveStart.x-e.clientX);
 				newy = noddes.states.nodesViewport.y+(-1)*(noddes.states.actionState.moveStart.y-e.clientY);
 				//console.log("Мы двигаем на "+newx+" и "+newy);
@@ -263,10 +286,15 @@ var noddes = {
 		},
 		endmove:function(e){
 			console.log('up');
+			if(noddes.states.actionState.action=="cursor" && noddes.states.actionState.nodemove==true){
+				noddes.states.actionState.nodemove=false;
+				noddes.changeCursor("grab");
+			}
 			if(noddes.states.keyboardState.spkey || noddes.states.actionState.action=="move"){
 				noddes.states.actionState.move=false;
 				noddes.changeCursor("grab");
 			}
+			//Todo MOVE all coords in loop
 			noddes.states.nodesViewport.x = parseInt(document.getElementById("NodesPanel").children[0].style.marginLeft);
 			noddes.states.nodesViewport.y = parseInt(document.getElementById("NodesPanel").children[0].style.marginTop);
 		}
@@ -332,7 +360,51 @@ var noddes = {
 
 	},
 	types:{
-		
+		typesList:[],
+		defaultTypes:["Arial","Impact","Times New Roman","Times","Roboto","Segoe UI","Liberation Serif"],
+		checkDefaultTypes:function(){
+			var baseFonts = ['monospace', 'sans-serif', 'serif'];
+    			var defaultWidth = {};
+    			var defaultHeight = {};
+
+			var s = document.createElement("span");
+			s.style.fontSize = '72px';
+			s.innerHTML = 'abcdefghijklmnopqrstuvwxyz';
+			document.body.appendChild(s);
+    			for (var index in baseFonts) {
+				s.style.fontFamily = baseFonts[index];
+				defaultWidth[index]=s.offsetWidth;
+				defaultHeight[index]=s.offsetHeight;
+			}
+			//console.log(defaultWidth)
+			for(var index in noddes.types.defaultTypes){
+				var original = true;
+				for(var i = 0; i<3; i++){
+					s.style.fontFamily = noddes.types.defaultTypes[index]+", "+baseFonts[i];
+					if(s.offsetWidth==defaultWidth[i] && s.offsetHeight==defaultHeight[i]){
+						original=false;
+						break;
+					}
+					
+				}
+				if(original){
+					noddes.types.typesList.push(noddes.types.defaultTypes[index]);
+				}
+			}
+			console.log(noddes.types.typesList);
+			//alert('TODO check default types familyes');
+		},
+		getFonts:function(o){
+			alert('TODO UI get fonts list near object '+o)
+		},
+		checkFont(fontName){
+			
+		}
+	},
+	colors:{
+		selectColor:function(o){
+			alert("todo selector color near object "+o);
+		}
 	},
 	props:{
 		types:[//Types of nodes
@@ -369,6 +441,35 @@ var noddes = {
 					unit: "px",
 					propel: 1
 				},
+				{
+					name: "HAlign",
+					type: "halign",
+					vars: ["top", "center", "bottom"],
+					propel: 3
+				},
+				{
+					name: "VAlign",
+					type: "valign",
+					vars: ["left", "center", "right"],
+					propel: 3
+				},
+				{
+					name: "Height",
+					type: "height",
+					unit: "px",
+					propel: 1
+				},
+				{
+					name: "Width",
+					type: "width",
+					unit: "px",
+					propel: 1
+				},
+				{
+					name: "Color",
+					type: "color",
+					propel: 4
+				},
 			],
 			[//image
 				{
@@ -394,7 +495,25 @@ var noddes = {
 			},
 			{//Font field
 				add:function(typeprop, val){
-					return typeprop.name+": FontsList";
+					return typeprop.name+": <input type='text' value='"+val+"'> <a onclick='noddes.types.getFonts(this);'>select</a>";
+				}
+			},
+			{//Selects
+				add:function(typeprop, val){
+					vars="";
+					for(var i=0;i<typeprop.vars.length;i++){
+						if(val==typeprop.vars[i]){
+							vars+="<option value='"+typeprop.vars[i]+"' selected='selected'>"+typeprop.vars[i]+"</option>"
+						}else{
+							vars+="<option value='"+typeprop.vars[i]+"'>"+typeprop.vars[i]+"</option>"
+						}
+					}
+					return typeprop.name+": <select value='"+val+"'>"+vars+"</select>";
+				}
+			},
+			{//Color
+				add:function(typeprop, val){
+					return typeprop.name+": <span onclick='noddes.colors.selectColor(this)' class='colorfield' style='background-color:#"+val+"'> ";
 				}
 			}
 		],
@@ -469,6 +588,7 @@ var noddes = {
 		actionState:{
 			action: "cursor",
 			move:false,//Перемещение по холсту
+			nodemove:false,
 			moveStart:{
 				x:null,
 				y:null
