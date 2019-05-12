@@ -54,10 +54,12 @@ var noddes = {
 				newLink.setAttribute("from-id", fromId);
 				newLink.setAttribute("to-id", toId);
 				newLink.className="NodeLine";
-
+				
+				//To
 				xStart = noddes.data[toIndex].x+50;
 				yStart = noddes.data[toIndex].y+20;
 
+				//From
 				linkWidth = noddes.data[fromIndex].x-noddes.data[toIndex].x;
 				linkHeight = noddes.data[fromIndex].y-noddes.data[toIndex].y;
 				if(linkWidth<2 && linkWidth>-2){
@@ -67,11 +69,9 @@ var noddes = {
 					linkHeight=2;
 				}
 				
-
 				newLink.innerHTML='<svg version="1.2" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="overflow: visible; width: '+linkWidth+'px; height: '+linkHeight+'px; opacity: 1; mix-blend-mode: normal;" viewBox="0 0 '+linkWidth+' '+linkHeight+'"><defs></defs><g><path style="stroke: rgb(0, 0, 0); stroke-width: 1; stroke-linecap: butt; stroke-linejoin: miter; fill: none;" d="M'+xStart+' '+yStart+' l'+linkWidth+' '+linkHeight+'"></path></g></svg>';
 				document.getElementsByClassName("NodesContainer")[0].appendChild(newLink);
 				
-
 				console.log("line "+noddes.data[fromIndex].name+" - "+noddes.data[toIndex].name);
 			
 			}
@@ -260,12 +260,57 @@ var noddes = {
 				selected = document.querySelectorAll('[data-selected=true]');
 				for(var i =0;i<selected.length;i++){
 					comp = getComputedStyle(document.querySelectorAll('[data-selected=true]')[i]).transform.split(", ");
-					//newx += ;
-					//newy += ;
-					//console.log(newx+" "+newy);
+
 					document.querySelectorAll('[data-selected=true]')[i].style.transform="rotate(0deg) translate("+(newx+parseInt(comp[4]))+"px, "+(newy+parseInt(comp[5]))+"px)";
+					var nodeID = selected[i].getAttribute("data-id");
+					var nodeIndex = noddes.nodes.getIndexById(nodeID);
+
+					var fromLinks = document.querySelectorAll('.NodeLine[from-id="'+nodeID+'"]');
+					var toLinks = document.querySelectorAll('.NodeLine[to-id="'+nodeID+'"]');
+					//toDo noddes.data[fromIndex].x -> DOM////
+					for(var j = 0;j<toLinks.length;j++){
+						fromIndex = noddes.nodes.getIndexById(toLinks[j].getAttribute("from-id"));
+						xStart = noddes.states.nodesViewport.z*(newx+parseInt(comp[4]))+50;
+						yStart = noddes.states.nodesViewport.z*(newy+parseInt(comp[5]))+20;
+						
+						linkWidth = (noddes.data[fromIndex].x-(newx+parseInt(comp[4])))*noddes.states.nodesViewport.z;
+						linkHeight = (noddes.data[fromIndex].y-(newy+parseInt(comp[5])))*noddes.states.nodesViewport.z;
+
+						if(linkWidth<2 && linkWidth>-2){
+							linkWidth=2;
+						}
+
+						if(linkHeight<2 && linkHeight>-2){
+							linkHeight=2;
+						}
+						toLinks[j].children[0].style.width=linkWidth+"px";
+						toLinks[j].children[0].style.height=linkHeight+"px";
+						toLinks[j].children[0].setAttribute("viewBox","0 0 "+linkWidth+" "+linkHeight);
+						toLinks[j].children[0].children[1].children[0].setAttribute("d","M"+xStart+" "+yStart+" l "+linkWidth+" "+linkHeight);
+					}
+
+					for(var j = 0;j<fromLinks.length;j++){
+						toIndex = noddes.nodes.getIndexById(fromLinks[j].getAttribute("to-id"));
+						xStart = noddes.states.nodesViewport.z*(newx+parseInt(comp[4]))+50;
+						yStart = noddes.states.nodesViewport.z*(newy+parseInt(comp[5]))+20;
+						
+						linkWidth = (noddes.data[toIndex].x-(newx+parseInt(comp[4])))*noddes.states.nodesViewport.z;
+						linkHeight = (noddes.data[toIndex].y-(newy+parseInt(comp[5])))*noddes.states.nodesViewport.z;
+
+						if(linkWidth<2 && linkWidth>-2){
+							linkWidth=2;
+						}
+
+						if(linkHeight<2 && linkHeight>-2){
+							linkHeight=2;
+						}
+						fromLinks[j].children[0].style.width=linkWidth+"px";
+						fromLinks[j].children[0].style.height=linkHeight+"px";
+						fromLinks[j].children[0].setAttribute("viewBox","0 0 "+linkWidth+" "+linkHeight);
+						fromLinks[j].children[0].children[1].children[0].setAttribute("d","M"+xStart+" "+yStart+" l "+linkWidth+" "+linkHeight);
+					}
+
 				}
-				//TODO Move all links in loop
 				noddes.states.actionState.moveStart={
 					x:e.clientX,
 					y:e.clientY
@@ -273,6 +318,8 @@ var noddes = {
 			}else if(noddes.states.actionState.move){
 				newx = noddes.states.nodesViewport.x+(-1)*(noddes.states.actionState.moveStart.x-e.clientX);
 				newy = noddes.states.nodesViewport.y+(-1)*(noddes.states.actionState.moveStart.y-e.clientY);
+				//
+				//document.getElementsByClassName("NodeBox")[i].getAttribute("data-id")
 				//console.log("Мы двигаем на "+newx+" и "+newy);
 				//Учесть Scale
 
@@ -288,7 +335,7 @@ var noddes = {
 			console.log('up');
 			if(noddes.states.actionState.action=="cursor" && noddes.states.actionState.nodemove==true){
 				noddes.states.actionState.nodemove=false;
-				noddes.changeCursor("grab");
+				noddes.changeCursor("default");
 			}
 			if(noddes.states.keyboardState.spkey || noddes.states.actionState.action=="move"){
 				noddes.states.actionState.move=false;

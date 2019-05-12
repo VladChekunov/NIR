@@ -15,7 +15,8 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 		* ~~LoadData~~
 		* ~~Links~~
 		* ~~Select~~
-		* Move
+		* ~~Move~~
+		* Save Move
 		* Remove
 		* Duplicate
 	* ~~LoadData~~
