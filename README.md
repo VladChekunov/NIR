@@ -19,6 +19,7 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 		* Save Move
 		* Remove
 		* Duplicate
+		* Add
 	* ~~LoadData~~
 	* Rulers
 * ~~Props View~~

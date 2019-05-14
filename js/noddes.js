@@ -332,8 +332,19 @@ var noddes = {
 			//console.log('move');
 		},
 		endmove:function(e){
-			console.log('up');
+			//console.log('up');
 			if(noddes.states.actionState.action=="cursor" && noddes.states.actionState.nodemove==true){
+				//2019
+				selected = document.querySelectorAll('[data-selected=true]');
+				for(var i =0;i<selected.length;i++){
+					var nodeID = selected[i].getAttribute("data-id");
+					var nodeIndex = noddes.nodes.getIndexById(nodeID);
+
+					newdata = getComputedStyle(document.querySelectorAll('[data-selected=true]')[i]).transform.split(" ");
+					noddes.data[nodeIndex].x = parseInt(newdata[4]);
+					noddes.data[nodeIndex].y = parseInt(newdata[5]);
+					//console.log(noddes.data[nodeIndex].x+"x"+noddes.data[nodeIndex].y);
+				}
 				noddes.states.actionState.nodemove=false;
 				noddes.changeCursor("default");
 			}
