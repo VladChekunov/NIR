@@ -16,10 +16,10 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 		* ~~Links~~
 		* ~~Select~~
 		* ~~Move~~
-		* Save Move
-		* Remove
-		* Duplicate
+		* ~~Save Move~~
+		* ~~Remove~~
 		* Add
+		* Duplicate
 	* ~~LoadData~~
 	* Rulers
 * ~~Props View~~

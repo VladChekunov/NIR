@@ -176,9 +176,26 @@ var noddes = {
 		},
 		changetool:function(index){
 			noddes.states.actionState.action = noddes.tools.toolsList[index];
-			
 			noddes.changeCursor(noddes.tools.cursorsList[index]);
-			//alert()
+		},
+		removenode:function(e){
+			//alert("TODO");
+			selected = document.querySelectorAll('[data-selected=true]');
+			for(var i =0;i<selected.length;i++){
+				var nodeID = selected[i].getAttribute("data-id");
+				var fromLinks = document.querySelectorAll('.NodeLine[from-id="'+nodeID+'"]');
+				var toLinks = document.querySelectorAll('.NodeLine[to-id="'+nodeID+'"]');
+
+				for(var j = 0;j<toLinks.length;j++){
+					toLinks[j].parentNode.removeChild(toLinks[j]);
+				}
+				for(var j = 0;j<fromLinks.length;j++){
+					fromLinks[j].parentNode.removeChild(fromLinks[j]);
+				}
+				selected[i].parentNode.removeChild(selected[i]);
+				
+				noddes.nodes.removeById(nodeID);
+			}
 		},
 		zoomplus:function(e){
 			noddes.states.nodesViewport.z+=0.1;
@@ -361,6 +378,9 @@ var noddes = {
 		document.addEventListener('keydown', function(e){
 			console.log(e);
 			switch(e.keyCode){
+				case 46: // Del
+					noddes.events.removenode();
+				break;
 				case 61: // -_
 					if(noddes.states.keyboardState.alkey){
 						noddes.events.zoomplus(e);
@@ -629,6 +649,21 @@ var noddes = {
 				}
 			}
 			return -1;
+		},
+		removeById:function(nid){
+			res = -1;
+			for(var i = 0;i<noddes.data.length;i++){
+				if(noddes.data[i].id==nid){
+					noddes.data.splice(i, 1);
+				}else{
+					for(var j = 0;j<noddes.data[i].inputs.length;j++){
+						if(noddes.data[i].inputs[j]==nid){
+							noddes.data[i].inputs.splice(j, 1);
+						}
+					}
+				}
+			}
+			return res;
 		}
 	},
 	selected:[],
