@@ -40,6 +40,21 @@ body{
 	width: 70vw;
 }
 
+.PreviewPanelWrapper{
+	display: flex;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	transform: translateZ(0);
+	height: 50vh;
+	width: 70vw;
+	background:#cccccc;
+}
+
 .ToolsPanelWrapper{
 	display:flex;
 	position:absolute;
@@ -84,6 +99,25 @@ body{
 	-ms-user-select: none;
 	user-select: none;
 }
+.PreviewPanel{
+	height: 10599.5px;
+	width: 4451.5px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	-ms-flex-preferred-size: 100% !important;
+	flex-basis: 100% !important;
+	will-change: transform;
+	background-color: rgb(210, 210, 210);
+	/* Disable highlight */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
 .NodesContainer{
 	/*height: 1000px;
 	width: 1400px;*/
@@ -97,6 +131,21 @@ body{
 	background-repeat: repeat;
 	background-position: center center;
 }
+
+.PreviewContainer{
+	/*height: 1000px;
+	width: 1400px;*/
+	/*left: 22px;
+	top: 52px;*/
+	z-index: auto;
+	mix-blend-mode: normal;
+	background-color: rgb(255, 255, 255);
+	background-image: none;
+	background-size: cover;
+	background-repeat: repeat;
+	background-position: center center;
+}
+
 .NodeBox{
 	z-index:1;
 	opacity: 1; 
@@ -136,4 +185,34 @@ body{
 	height:24px;
 	border-radius:4px;
 	border:solid #000 1px;
+}
+
+.popupPanel{
+	display:block;
+	position:fixed;
+	width:100%;
+	height:100%;
+	z-index:999;
+	top:0;
+	left:0;
+	pointer-events:none;
+}
+
+.popupPanel *{
+	pointer-events:all;
+}
+
+.modalWindow{
+	background:#333;
+	width: -moz-fit-content;
+	width: -webkit-fit-content;
+	width: fit-content;
+	display: inline-block;
+	padding: 12px;
+	position:absolute;
+	top:200px;
+	left:0;
+	right:0;
+	margin: auto;
+	text-align:center;
 }

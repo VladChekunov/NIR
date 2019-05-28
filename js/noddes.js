@@ -11,7 +11,7 @@ var noddes = {
 		noddes.initKeyboard();
 		//Mouse
 		document.addEventListener('mousedown', noddes.events.startmove);
-		document.addEventListener('click', noddes.events.startclick);
+		document.getElementById("NodesPanel").addEventListener('click', noddes.events.startclick);
 		document.addEventListener('mousemove', noddes.events.move);
 		document.addEventListener('mouseup', noddes.events.endmove);
 		//Touchpad
@@ -33,8 +33,7 @@ var noddes = {
 		}
 		
 	},
-	renderData:function(){//Render Data on NodeTree		
-		for(var i = 0; i<noddes.data.length;i++){
+	renderDataByIndex:function(i){
 			newNode = document.createElement("div");
 			newNode.innerHTML=noddes.data[i].name;
 			newNode.style.background=noddes.data[i].color;
@@ -75,6 +74,10 @@ var noddes = {
 				console.log("line "+noddes.data[fromIndex].name+" - "+noddes.data[toIndex].name);
 			
 			}
+	},
+	renderData:function(){//Render Data on NodeTree		
+		for(var i = 0; i<noddes.data.length;i++){
+			noddes.renderDataByIndex(i);
 		}
 		noddes.reRenderData();
 	},
@@ -124,8 +127,36 @@ var noddes = {
 		}
 	},
 	events:{
+		createnode:function(e){
+			newNode = {};
+			newNode.id = noddes.nodes.genNewId();
+			newNode.type = noddes.props.types[parseInt(document.getElementById("newNodeSelect").value)];
+			newNode.color="#aaa";
+			newNode.name=noddes.props.typesNames[parseInt(document.getElementById("newNodeSelect").value)];
+			newNode.x = noddes.states.newNode.x;
+			newNode.y = noddes.states.newNode.y;
+			newNode.inputs = [];
+			newNode.cache = null;
+
+			newNode.data = {};			
+			for(var i = 0;i<noddes.props.typesprops[parseInt(document.getElementById("newNodeSelect").value)].length;i++){
+				newNode.data[noddes.props.typesprops[parseInt(document.getElementById("newNodeSelect").value)][i].type]=noddes.props.typesprops[parseInt(document.getElementById("newNodeSelect").value)][i].def;
+			}
+			noddes.data.push(newNode);
+			noddes.renderDataByIndex(noddes.data.length-1);
+			noddes.windows.clearModalWindows();
+		},
+		addnode:function(e){
+			noddes.states.newNode.x = e.clientX-noddes.states.nodesViewport.x;
+			noddes.states.newNode.y = e.clientY-noddes.states.nodesViewport.y;
+			noddes.windows.addNewNodeWindow();
+		},
 		startclick:function(e){
-			if(noddes.states.actionState.action=="cursor"){
+			if(noddes.states.actionState.action=="add"){
+				noddes.states.actionState.action="cursor";
+				noddes.changeCursor(noddes.tools.cursorsList[0]);
+				noddes.events.addnode(e);
+			}else if(noddes.states.actionState.action=="cursor"){
 				if(e.target.className=="NodesContainer" || e.target.parentNode.className=="NodesContainer" || e.target.parentNode.parentNode.parentNode.parentNode.className=="NodesContainer"){
 					if((!noddes.states.keyboardState.ctkey && !noddes.states.keyboardState.shkey) || e.target.className=="NodesContainer"){
 						//Clear selected list
@@ -470,13 +501,28 @@ var noddes = {
 				}
 			}
 			console.log(noddes.types.typesList);
+
+			document.body.removeChild(s);
 			//alert('TODO check default types familyes');
 		},
 		getFonts:function(o){
 			alert('TODO UI get fonts list near object '+o)
 		},
 		checkFont(fontName){
-			
+			//TODO CHECK FONT
+		}
+	},
+	windows:{
+		addNewNodeWindow:function(){
+			result = "<div class=\"modalWindow\">New Node<br><select id=\"newNodeSelect\">";
+			for(var i = 0;i<noddes.props.types.length;i++){
+				result+="<option value=\""+i+"\">"+noddes.props.typesNames[i]+"</option>";
+			}
+			result+="</select><br><a onclick=\"noddes.events.createnode();\" href=\"javascript://\">Add</a> <a onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Canel</a></div>";
+			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+		},
+		clearModalWindows:function(){
+			document.getElementsByClassName("popupPanel")[0].innerHTML="";
 		}
 	},
 	colors:{
@@ -490,6 +536,12 @@ var noddes = {
 			"text",
 			"image",
 			"marge"
+		],
+		typesNames:[
+			"View Node",
+			"Text Node",
+			"Image Node",
+			"Marge Node"
 		],
 		typesprops:[//Fields of nodes types
 			[//view
@@ -511,41 +563,48 @@ var noddes = {
 				{
 					name: "Font",
 					type: "font",
+					def: "Arial",
 					propel: 2
 				},
 				{
 					name: "Size",
 					type: "size",
 					unit: "px",
+					def: 18,
 					propel: 1
 				},
 				{
 					name: "HAlign",
 					type: "halign",
 					vars: ["top", "center", "bottom"],
+					def: "top",
 					propel: 3
 				},
 				{
 					name: "VAlign",
 					type: "valign",
 					vars: ["left", "center", "right"],
+					def: "left",
 					propel: 3
 				},
 				{
 					name: "Height",
 					type: "height",
+					def: "120",
 					unit: "px",
 					propel: 1
 				},
 				{
 					name: "Width",
 					type: "width",
+					def: "180",
 					unit: "px",
 					propel: 1
 				},
 				{
 					name: "Color",
 					type: "color",
+					def: "000000",
 					propel: 4
 				},
 			],
@@ -642,6 +701,13 @@ var noddes = {
 		console.log("Курсор: "+cursorType)
 	},
 	nodes:{
+		genNewId:function(){
+			var id = noddes.data[noddes.data.length-1].id;
+			while(noddes.nodes.getIndexById(id)!=-1){
+				id++;	
+			}
+			return id;
+		},
 		getIndexById:function(nid){
 			for(var i = 0;i<noddes.data.length;i++){
 				if(noddes.data[i].id==nid){
@@ -691,6 +757,10 @@ var noddes = {
 			x:0,
 			y:0,
 			z:1//Zoom
+		},
+		newNode:{
+			x:0,
+			y:0
 		}
 	}
 }
