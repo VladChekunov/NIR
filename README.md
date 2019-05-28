@@ -18,13 +18,14 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 		* ~~Move~~
 		* ~~Save Move~~
 		* ~~Remove~~
-		* Add
+		* ~~Add~~
 		* Duplicate
 	* ~~LoadData~~
 	* Rulers
 * ~~Props View~~
+	* ~~Props types~~
 	* Nodes Types
-	* Props types
+	* Save
 * Preview Panel
 	* View
 	* Move

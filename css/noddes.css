@@ -216,3 +216,85 @@ body{
 	margin: auto;
 	text-align:center;
 }
+
+.tabs a{
+	display:inline-block;
+	background:#333;
+	color:#fff;
+	text-decoration:none;
+	margin:0;
+	padding:4px;
+}
+.tabs a.act{
+	background:#999;
+}
+
+.btn{
+	display: inline-block;
+	width: auto;
+	height: auto;
+	background: #33ffff;
+	padding: 12px;
+	margin: 4px;
+	color: #000;
+	text-decoration: none;
+}
+
+.nodeListEl{
+	display: block;
+	height: auto;
+	background: #33ffff;
+	padding: 4px;
+	margin: 4px;
+	color: #000;
+	text-decoration: none;
+	clear:both;
+	width:100%;
+	width:-moz-available;
+	width:-webkit-available;
+	width:available;
+}
+
+.listElement{
+	display: block;
+	border-bottom:solid 1px #333;
+	height:25px;
+	background: #bbb;
+	padding: 6px;
+	color: #000;
+	text-decoration: none;
+	clear:both;
+	width:100%;
+	width:-moz-available;
+	width:-webkit-available;
+	width:available;
+}
+
+.rembtn{
+	display:block;
+	width:25px;
+	height:25px;
+	background:#ff3333;
+	float: right;
+	padding-top: 1px;
+    	padding-right: 1px;
+    	padding-left: 1px;
+	text-align: center;
+	padding-left: 4px;
+	padding-right: 4px;
+	color: #fff;
+}
+.movbtn{
+	display:block;
+	width:25px;
+	height:25px;
+	background:#3333ff;
+	float: right;
+	padding-top: 1px;
+    	padding-right: 1px;
+    	padding-left: 1px;
+	text-align: center;
+	padding-left: 4px;
+	padding-right: 4px;
+	color: #fff;
+}

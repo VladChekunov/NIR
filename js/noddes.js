@@ -10,7 +10,7 @@ var noddes = {
 	initEvents:function(){
 		noddes.initKeyboard();
 		//Mouse
-		document.addEventListener('mousedown', noddes.events.startmove);
+		document.getElementById("NodesPanel").addEventListener('mousedown', noddes.events.startmove);
 		document.getElementById("NodesPanel").addEventListener('click', noddes.events.startclick);
 		document.addEventListener('mousemove', noddes.events.move);
 		document.addEventListener('mouseup', noddes.events.endmove);
@@ -33,10 +33,23 @@ var noddes = {
 		}
 		
 	},
+	updateNode:function(nid, index){
+		if(index==undefined){
+			index = noddes.nodes.getIndexById(nid);
+		}
+		node = document.querySelector('div.NodeBox[data-id="'+nid+'"]');
+		//type color name x y
+		//inputs
+		node.style.background="#"+noddes.data[index].color;
+		node.innerHTML=noddes.data[index].name;
+		//node.style.transform="rotate(0deg) translate("+noddes.data[index].x+"px, "+noddes.data[index].y+"px)";
+		noddes.reRenderData();
+		
+	},
 	renderDataByIndex:function(i){
 			newNode = document.createElement("div");
 			newNode.innerHTML=noddes.data[i].name;
-			newNode.style.background=noddes.data[i].color;
+			newNode.style.background="#"+noddes.data[i].color;
 			newNode.className="NodeBox";
 			newNode.setAttribute("data-id", noddes.data[i].id);
 			newNode.style.transform="rotate(0deg) translate("+noddes.data[i].x+"px, "+noddes.data[i].y+"px)";
@@ -210,7 +223,6 @@ var noddes = {
 			noddes.changeCursor(noddes.tools.cursorsList[index]);
 		},
 		removenode:function(e){
-			//alert("TODO");
 			selected = document.querySelectorAll('[data-selected=true]');
 			for(var i =0;i<selected.length;i++){
 				var nodeID = selected[i].getAttribute("data-id");
@@ -315,7 +327,8 @@ var noddes = {
 
 					var fromLinks = document.querySelectorAll('.NodeLine[from-id="'+nodeID+'"]');
 					var toLinks = document.querySelectorAll('.NodeLine[to-id="'+nodeID+'"]');
-					//toDo noddes.data[fromIndex].x -> DOM////
+					console.log("TODO Относительно DOM, а не data");
+					//noddes.data[fromIndex].x -> DOM////
 					for(var j = 0;j<toLinks.length;j++){
 						fromIndex = noddes.nodes.getIndexById(toLinks[j].getAttribute("from-id"));
 						xStart = noddes.states.nodesViewport.z*(newx+parseInt(comp[4]))+50;
@@ -501,24 +514,40 @@ var noddes = {
 				}
 			}
 			console.log(noddes.types.typesList);
-
 			document.body.removeChild(s);
-			//alert('TODO check default types familyes');
 		},
 		getFonts:function(o){
 			alert('TODO UI get fonts list near object '+o)
 		},
 		checkFont(fontName){
-			//TODO CHECK FONT
+			alert("TODO CHECK USER TYPED FONT");
 		}
 	},
 	windows:{
+		getElementHTML:function(nid){
+			var nodeIndex = noddes.nodes.getIndexById(nid);
+			return '<div class="listElement" data-id="'+nid+'"><span>'+noddes.data[nodeIndex].name+'</span><a onclick="this.parentNode.parentNode.removeChild(this.parentNode);" class="rembtn" href="javascript://"><i style="font-size:24px" class="fa">&#xf00d;</i></a>'+'<a onclick="if(this.parentNode.nextSibling){var cin = this.parentNode.nextSibling.children[0].innerHTML;this.parentNode.nextSibling.children[0].innerHTML=this.parentNode.children[0].innerHTML;this.parentNode.children[0].innerHTML=cin;var cid = this.parentNode.nextSibling.getAttribute(\'data-id\');this.parentNode.nextSibling.setAttribute(\'data-id\', this.parentNode.getAttribute(\'data-id\'));this.parentNode.setAttribute(\'data-id\', cid);}" class="movbtn" href="javascript://"><i style="font-size:24px" class="fa">&#xf0d7;</i></a>'+'<a onclick="if(this.parentNode.previousSibling){var cin = this.parentNode.previousSibling.children[0].innerHTML;this.parentNode.previousSibling.children[0].innerHTML=this.parentNode.children[0].innerHTML;this.parentNode.children[0].innerHTML=cin;var cid = this.parentNode.previousSibling.getAttribute(\'data-id\');this.parentNode.previousSibling.setAttribute(\'data-id\', this.parentNode.getAttribute(\'data-id\'));this.parentNode.setAttribute(\'data-id\', cid);};" class="movbtn" href="javascript://"><i style="font-size:24px" class="fa">&#xf0d8;</i></a></div>';
+			
+		},
+		changeElement:function(nid){
+			document.getElementsByClassName('nodesList')[0].innerHTML+=noddes.windows.getElementHTML(nid);
+			noddes.windows.clearModalWindows();
+		},
+		addChangeElementWindow:function(){
+			result = "<div class=\"modalWindow\">Select node from list:<br>";
+			//console.log()
+			for(var i = 0;i<noddes.data.length;i++){
+				result += "<a class='nodeListEl' onclick='noddes.windows.changeElement("+noddes.data[i].id+")' href='javascript://'>"+noddes.data[i].name+"</a>";
+			}
+			result += "</div>";
+			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+		},
 		addNewNodeWindow:function(){
 			result = "<div class=\"modalWindow\">New Node<br><select id=\"newNodeSelect\">";
 			for(var i = 0;i<noddes.props.types.length;i++){
 				result+="<option value=\""+i+"\">"+noddes.props.typesNames[i]+"</option>";
 			}
-			result+="</select><br><a onclick=\"noddes.events.createnode();\" href=\"javascript://\">Add</a> <a onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Canel</a></div>";
+			result+="</select><br><a class=\"btn\" onclick=\"noddes.events.createnode();\" href=\"javascript://\">Add</a> <a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Canel</a></div>";
 			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
 		},
 		clearModalWindows:function(){
@@ -526,11 +555,32 @@ var noddes = {
 		}
 	},
 	colors:{
+		rgbToHex:function(rgb){
+			function hex(x){return ("0" + parseInt(x).toString(16)).slice(-2);}
+			rgb = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(,\s*\d+\.*\d+)?\)$/);
+			return hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+		},
 		selectColor:function(o){
 			alert("todo selector color near object "+o);
 		}
 	},
 	props:{
+		showProps:function(){
+			if(document.querySelectorAll(".PropsContainer .tabs")[0].children[1].className=="act"){
+				document.querySelectorAll(".PropsContainer .tabs")[0].children[0].classList.add("act");
+				document.querySelectorAll(".PropsContainer .tabs")[0].children[1].classList.remove("act");
+				document.getElementsByClassName("datasArea")[0].style.display="none";
+				document.getElementsByClassName("propsArea")[0].style.display="block";
+			}
+		},
+		showDatas:function(){
+			if(document.querySelectorAll(".PropsContainer .tabs")[0].children[0].className=="act"){
+				document.querySelectorAll(".PropsContainer .tabs")[0].children[1].classList.add("act");
+				document.querySelectorAll(".PropsContainer .tabs")[0].children[0].classList.remove("act");
+				document.getElementsByClassName("propsArea")[0].style.display="none";
+				document.getElementsByClassName("datasArea")[0].style.display="block";
+			}
+		},
 		types:[//Types of nodes
 			"view",
 			"text",
@@ -623,16 +673,27 @@ var noddes = {
 			{//Text field
 				add:function(typeprop, val){
 					return typeprop.name+": <input value='"+val+"'>";
+				},
+				get:function(fieldDOMNode){
+					//console.log(fieldDOMNode);
+					//document.getElementsByClassName("datasArea")[0].getElementsByClassName("field")[0]
+					return fieldDOMNode.children[0].value;
 				}
 			},
 			{//Numberic field
 				add:function(typeprop, val){
 					return typeprop.name+": <input type='number' value='"+val+"'>"+typeprop.unit;
+				},
+				get:function(fieldDOMNode){
+					return fieldDOMNode.children[0].value;
 				}
 			},
 			{//Font field
 				add:function(typeprop, val){
 					return typeprop.name+": <input type='text' value='"+val+"'> <a onclick='noddes.types.getFonts(this);'>select</a>";
+				},
+				get:function(fieldDOMNode){
+					return fieldDOMNode.children[0].value;
 				}
 			},
 			{//Selects
@@ -646,11 +707,31 @@ var noddes = {
 						}
 					}
 					return typeprop.name+": <select value='"+val+"'>"+vars+"</select>";
+				},
+				get:function(fieldDOMNode){
+					return fieldDOMNode.children[0].value;
 				}
 			},
 			{//Color
 				add:function(typeprop, val){
 					return typeprop.name+": <span onclick='noddes.colors.selectColor(this)' class='colorfield' style='background-color:#"+val+"'> ";
+				},
+				get:function(fieldDOMNode){
+					return noddes.colors.rgbToHex(fieldDOMNode.children[0].style.backgroundColor);
+				}
+			},
+			{//List
+				add:function(typeprop, val){
+					list="<div class='nodesList'>";
+					for(var i = 0;i<val.length;i++){
+						list+=noddes.windows.getElementHTML(val[i]);
+					}
+					list+="</div>";
+					list+="<a class=\"btn\" onclick=\"noddes.windows.addChangeElementWindow(this);\" href=\"javascript://\">Add Node</a>";
+					return typeprop.name+": "+list;
+				},
+				get:function(fieldDOMNode){
+					//
 				}
 			}
 		],
@@ -659,6 +740,7 @@ var noddes = {
 		open:function(nid){
 			var nodeIndex = noddes.nodes.getIndexById(nid);
 			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected Node "+nid+", type "+noddes.data[nodeIndex].type;
+			document.getElementsByClassName("PropsContainer")[0].innerHTML+="<div class=\"tabs\"><a class=\"act\" onclick=\"noddes.props.showProps()\" href=\"javascript://\">Props</a><a onclick=\"noddes.props.showDatas()\" href=\"javascript://\">Datas</a></div><div style=\"display:block\" class=\"propsArea\"></div><div style=\"display:none\" class=\"datasArea\"></div>";
 			var nodeTypeId = -1;
 			
 			for(var i = 0;i<noddes.props.types.length;i++){
@@ -666,11 +748,71 @@ var noddes = {
 					nodeTypeId=i;
 				}
 			}
+
+			//Add node props
+			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[3].add({
+				name:"Type",
+				vars:noddes.props.types
+			},noddes.data[nodeIndex].type)+"</div>";
+
+			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[4].add({
+				name:"Color"
+			},noddes.data[nodeIndex].color)+"</div>";
+
+			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[0].add({
+				name:"Name"
+			},noddes.data[nodeIndex].name)+"</div>";
+			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[1].add({
+				name:"X",
+				unit:"px"
+			},noddes.data[nodeIndex].x)+"</div>";
+			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[1].add({
+				name:"Y",
+				unit:"px"
+			},noddes.data[nodeIndex].y)+"</div>";
+			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[5].add({
+				name:"Inputs"
+			},noddes.data[nodeIndex].inputs)+"</div>";
+
+			//Add data props
 			for(var i = 0;i<noddes.props.typesprops[nodeTypeId].length;i++){
 				el = noddes.props.typesprops[nodeTypeId][i];
 				console.log(noddes.props.typesprops[nodeTypeId][i].propel)
-				document.getElementsByClassName("PropsContainer")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].add(el, noddes.data[nodeIndex].data[el.type])+"</div>";
+				document.getElementsByClassName("datasArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].add(el, noddes.data[nodeIndex].data[el.type])+"</div>";
 			}
+			document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.props.saveProps('+nid+');" class="btn">Save</a>';
+			document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.nodes.duplicateNode('+nid+');" class="btn">Duplicate</a>';
+		},
+		saveProps:function(nid){
+			var nodeIndex = noddes.nodes.getIndexById(nid);
+			var nodeTypeId = -1;
+			for(var i = 0;i<noddes.props.types.length;i++){
+				if(noddes.data[nodeIndex].type==noddes.props.types[i]){
+					nodeTypeId=i;
+				}
+			}
+			//Type
+			noddes.data[nodeIndex]["type"] = noddes.props.propselslist[3].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[0]);
+			//Color
+			noddes.data[nodeIndex]["color"] = noddes.props.propselslist[4].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[1]);
+			//Name
+			noddes.data[nodeIndex]["name"] = noddes.props.propselslist[0].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[2]);
+			//X
+			noddes.data[nodeIndex]["x"] = noddes.props.propselslist[1].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[3]);
+			//Y
+			noddes.data[nodeIndex]["y"] = noddes.props.propselslist[1].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[4]);
+			console.log("TODO SAVE INPUTS");
+			
+			noddes.updateNode(nid, nodeIndex);
+
+			for(var i = 0;i<noddes.props.typesprops[nodeTypeId].length;i++){
+				noddes.data[nodeIndex].data[noddes.props.typesprops[nodeTypeId][i].type] = noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].get(document.getElementsByClassName("datasArea")[0].getElementsByClassName("field")[i]);
+			}
+
+			console.log(noddes.data[nodeIndex].x);
+
+			//alert("TODO SAVE PROPS"+noddes.props.types[nodeTypeId]);
+			
 		},
 		stats:function(){
 			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected "+noddes.selected.length+" objects.";
@@ -701,6 +843,9 @@ var noddes = {
 		console.log("Курсор: "+cursorType)
 	},
 	nodes:{
+		duplicateNode:function(){
+			alert("TODO Duplicate");
+		},
 		genNewId:function(){
 			var id = noddes.data[noddes.data.length-1].id;
 			while(noddes.nodes.getIndexById(id)!=-1){
