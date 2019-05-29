@@ -322,12 +322,10 @@ var noddes = {
 				if(noddes.states.keyboardState.ctkey){
 					//-
 					noddes.events.zoomminus(e);
-					//alert(0);
 				}else{
 					//+
 					noddes.events.zoomplus(e);
 				}
-				//alert("zoom");
 			}
 		},
 		move:function(e){
@@ -828,18 +826,11 @@ var noddes = {
 			noddes.data[nodeIndex]["y"] = noddes.props.propselslist[1].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[4]);
 			//inputs
 			noddes.data[nodeIndex]["inputs"] = noddes.props.propselslist[5].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[5]);
-			console.log("TODO UPDATE INPUTS");
-			
 			noddes.updateNode(nid, nodeIndex);
 
 			for(var i = 0;i<noddes.props.typesprops[nodeTypeId].length;i++){
 				noddes.data[nodeIndex].data[noddes.props.typesprops[nodeTypeId][i].type] = noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].get(document.getElementsByClassName("datasArea")[0].getElementsByClassName("field")[i]);
-			}
-
-			console.log(noddes.data[nodeIndex].x);
-
-			//alert("TODO SAVE PROPS"+noddes.props.types[nodeTypeId]);
-			
+			}			
 		},
 		stats:function(){
 			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected "+noddes.selected.length+" objects.";
