@@ -368,23 +368,25 @@ var noddes = {
 
 					for(var j = 0;j<fromLinks.length;j++){
 						toIndex = noddes.nodes.getIndexById(fromLinks[j].getAttribute("to-id"));
-						xStart = noddes.states.nodesViewport.z*(newx+parseInt(comp[4]))+50;
-						yStart = noddes.states.nodesViewport.z*(newy+parseInt(comp[5]))+20;
-						
-						linkWidth = (noddes.data[toIndex].x-(newx+parseInt(comp[4])))*noddes.states.nodesViewport.z;
-						linkHeight = (noddes.data[toIndex].y-(newy+parseInt(comp[5])))*noddes.states.nodesViewport.z;
+						if(toIndex!=-1){
+							xStart = noddes.states.nodesViewport.z*(newx+parseInt(comp[4]))+50;
+							yStart = noddes.states.nodesViewport.z*(newy+parseInt(comp[5]))+20;
+							
+							linkWidth = (noddes.data[toIndex].x-(newx+parseInt(comp[4])))*noddes.states.nodesViewport.z;
+							linkHeight = (noddes.data[toIndex].y-(newy+parseInt(comp[5])))*noddes.states.nodesViewport.z;
 
-						if(linkWidth<2 && linkWidth>-2){
-							linkWidth=2;
-						}
+							if(linkWidth<2 && linkWidth>-2){
+								linkWidth=2;
+							}
 
-						if(linkHeight<2 && linkHeight>-2){
-							linkHeight=2;
+							if(linkHeight<2 && linkHeight>-2){
+								linkHeight=2;
+							}
+							fromLinks[j].children[0].style.width=linkWidth+"px";
+							fromLinks[j].children[0].style.height=linkHeight+"px";
+							fromLinks[j].children[0].setAttribute("viewBox","0 0 "+linkWidth+" "+linkHeight);
+							fromLinks[j].children[0].children[1].children[0].setAttribute("d","M"+xStart+" "+yStart+" l "+linkWidth+" "+linkHeight);
 						}
-						fromLinks[j].children[0].style.width=linkWidth+"px";
-						fromLinks[j].children[0].style.height=linkHeight+"px";
-						fromLinks[j].children[0].setAttribute("viewBox","0 0 "+linkWidth+" "+linkHeight);
-						fromLinks[j].children[0].children[1].children[0].setAttribute("d","M"+xStart+" "+yStart+" l "+linkWidth+" "+linkHeight);
 					}
 
 				}
@@ -416,10 +418,12 @@ var noddes = {
 				for(var i =0;i<selected.length;i++){
 					var nodeID = selected[i].getAttribute("data-id");
 					var nodeIndex = noddes.nodes.getIndexById(nodeID);
-
-					newdata = getComputedStyle(document.querySelectorAll('[data-selected=true]')[i]).transform.split(" ");
-					noddes.data[nodeIndex].x = parseInt(newdata[4]);
-					noddes.data[nodeIndex].y = parseInt(newdata[5]);
+					//console.log(nodeIndex+"#######");
+					if(nodeIndex!=-1){
+						newdata = getComputedStyle(document.querySelectorAll('[data-selected=true]')[i]).transform.split(" ");
+						noddes.data[nodeIndex].x = parseInt(newdata[4]);
+						noddes.data[nodeIndex].y = parseInt(newdata[5]);
+					}
 					//console.log(noddes.data[nodeIndex].x+"x"+noddes.data[nodeIndex].y);
 				}
 				noddes.states.actionState.nodemove=false;
@@ -499,7 +503,7 @@ var noddes = {
 	},
 	types:{
 		typesList:[],
-		defaultTypes:["Arial","Impact","Times New Roman","Times","Roboto","Segoe UI","Liberation Serif"],
+		defaultTypes:["Arial","Impact","Helvetica","Courier New","Courier","Verdana","Georgia","Palatino","Garamond","Bookman","Comic Sans MS","Trebuchet MS","Arial Black","Impact","Times New Roman","Times","Roboto","Segoe UI","Liberation Serif"],
 		checkDefaultTypes:function(){
 			var baseFonts = ['monospace', 'sans-serif', 'serif'];
     			var defaultWidth = {};
@@ -533,13 +537,51 @@ var noddes = {
 			document.body.removeChild(s);
 		},
 		getFonts:function(o){
-			alert('TODO UI get fonts list near object '+o)
+			offsets = o.getBoundingClientRect();
+			pastePlace=o.parentNode.children[0];
+			noddes.windows.showSelectFontWin(Math.floor(offsets.left)-window.innerWidth/4, Math.floor(offsets.top)+24, pastePlace);
 		},
 		checkFont(fontName){
 			alert("TODO CHECK USER TYPED FONT");
 		}
 	},
 	windows:{
+		showSelectColorWin:function(x,y,pp){
+			col = pp.style.backgroundColor;
+			col = col.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(,\s*\d+\.*\d+)?\)$/);
+			r=col[1];
+			g=col[2];
+			b=col[3];
+			result = "<div style=\"position:absolute;width:25vw;right:auto;top:"+y+"px;left:"+x+"px;\" class=\"modalWindow\"><span>Select color:</span><br><input class=\"colorPickerRed\" type=\"number\" value=\""+r+"\"><br><input class=\"colorPickerGreen\" type=\"number\" value=\""+g+"\"><br><input class=\"colorPickerBlue\" type=\"number\" value=\""+b+"\"><br></div>";
+			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+			var a = document.createElement("a");
+			document.getElementsByClassName("modalWindow")[0].appendChild(a);
+			a.innerHTML="Save";
+			a.href="javascript://";
+			a.className="btn";
+			a.onclick=function(){
+				pp.style.backgroundColor = "#"+noddes.colors.rgbToHex("rgb("+document.getElementsByClassName("colorPickerRed")[0].value+", "+document.getElementsByClassName("colorPickerGreen")[0].value+", "+document.getElementsByClassName("colorPickerBlue")[0].value+")");
+				noddes.windows.clearModalWindows();
+			}
+			
+		},
+		showSelectFontWin:function(x,y,pp){
+			result = "<div style=\"position:absolute;width:25vw;right:auto;top:"+y+"px;left:"+x+"px;\" class=\"modalWindow\"><span>Select font:</span></div>";
+			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+			for(i = 0;i<noddes.types.typesList.length;i++){
+				var a = document.createElement("a");
+				document.getElementsByClassName("modalWindow")[0].appendChild(a);
+				a.innerHTML=noddes.types.typesList[i];
+				a.href="javascript://";
+				a.className="fontListEl";
+				a.onclick=function(){
+					pp.value = this.innerHTML;
+					noddes.windows.clearModalWindows();
+				}
+				//result += noddes.types.typesList[i]+"<br>";
+			}
+			
+		},
 		getElementHTML:function(nid){
 			var nodeIndex = noddes.nodes.getIndexById(nid);
 			return '<div class="listElement" data-id="'+nid+'"><span>'+noddes.data[nodeIndex].name+'</span><a onclick="this.parentNode.parentNode.removeChild(this.parentNode);" class="rembtn" href="javascript://"><i style="font-size:24px" class="fa">&#xf00d;</i></a>'+'<a onclick="if(this.parentNode.nextSibling){var cin = this.parentNode.nextSibling.children[0].innerHTML;this.parentNode.nextSibling.children[0].innerHTML=this.parentNode.children[0].innerHTML;this.parentNode.children[0].innerHTML=cin;var cid = this.parentNode.nextSibling.getAttribute(\'data-id\');this.parentNode.nextSibling.setAttribute(\'data-id\', this.parentNode.getAttribute(\'data-id\'));this.parentNode.setAttribute(\'data-id\', cid);}" class="movbtn" href="javascript://"><i style="font-size:24px" class="fa">&#xf0d7;</i></a>'+'<a onclick="if(this.parentNode.previousSibling){var cin = this.parentNode.previousSibling.children[0].innerHTML;this.parentNode.previousSibling.children[0].innerHTML=this.parentNode.children[0].innerHTML;this.parentNode.children[0].innerHTML=cin;var cid = this.parentNode.previousSibling.getAttribute(\'data-id\');this.parentNode.previousSibling.setAttribute(\'data-id\', this.parentNode.getAttribute(\'data-id\'));this.parentNode.setAttribute(\'data-id\', cid);};" class="movbtn" href="javascript://"><i style="font-size:24px" class="fa">&#xf0d8;</i></a></div>';
@@ -577,7 +619,8 @@ var noddes = {
 			return hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 		},
 		selectColor:function(o){
-			alert("todo selector color near object "+o);
+			offsets = o.getBoundingClientRect();;
+			noddes.windows.showSelectColorWin(Math.floor(offsets.left)-window.innerWidth/4, Math.floor(offsets.top)+24, o);
 		}
 	},
 	props:{
@@ -709,7 +752,7 @@ var noddes = {
 			},
 			{//Font field
 				add:function(typeprop, val){
-					return typeprop.name+": <input type='text' value='"+val+"'> <a onclick='noddes.types.getFonts(this);'>select</a>";
+					return typeprop.name+": <input type='text' value='"+val+"'> <a href='javascript://' onclick='noddes.types.getFonts(this);'>select</a>";
 				},
 				get:function(fieldDOMNode){
 					return fieldDOMNode.children[0].value;
@@ -762,49 +805,51 @@ var noddes = {
 
 		open:function(nid){
 			var nodeIndex = noddes.nodes.getIndexById(nid);
-			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected Node "+nid+", type "+noddes.data[nodeIndex].type;
-			document.getElementsByClassName("PropsContainer")[0].innerHTML+="<div class=\"tabs\"><a class=\"act\" onclick=\"noddes.props.showProps()\" href=\"javascript://\">Props</a><a onclick=\"noddes.props.showDatas()\" href=\"javascript://\">Datas</a></div><div style=\"display:block\" class=\"propsArea\"></div><div style=\"display:none\" class=\"datasArea\"></div>";
-			var nodeTypeId = -1;
-			
-			for(var i = 0;i<noddes.props.types.length;i++){
-				if(noddes.data[nodeIndex].type==noddes.props.types[i]){
-					nodeTypeId=i;
+			if(nodeIndex!=-1){
+				document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected Node "+nid+", type "+noddes.data[nodeIndex].type;
+				document.getElementsByClassName("PropsContainer")[0].innerHTML+="<div class=\"tabs\"><a class=\"act\" onclick=\"noddes.props.showProps()\" href=\"javascript://\">Props</a><a onclick=\"noddes.props.showDatas()\" href=\"javascript://\">Datas</a></div><div style=\"display:block\" class=\"propsArea\"></div><div style=\"display:none\" class=\"datasArea\"></div>";
+				var nodeTypeId = -1;
+				
+				for(var i = 0;i<noddes.props.types.length;i++){
+					if(noddes.data[nodeIndex].type==noddes.props.types[i]){
+						nodeTypeId=i;
+					}
 				}
+
+				//Add node props
+				document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[3].add({
+					name:"Type",
+					vars:noddes.props.types
+				},noddes.data[nodeIndex].type)+"</div>";
+
+				document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[4].add({
+					name:"Color"
+				},noddes.data[nodeIndex].color)+"</div>";
+
+				document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[0].add({
+					name:"Name"
+				},noddes.data[nodeIndex].name)+"</div>";
+				document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[1].add({
+					name:"X",
+					unit:"px"
+				},noddes.data[nodeIndex].x)+"</div>";
+				document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[1].add({
+					name:"Y",
+					unit:"px"
+				},noddes.data[nodeIndex].y)+"</div>";
+				document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[5].add({
+					name:"Inputs"
+				},noddes.data[nodeIndex].inputs)+"</div>";
+
+				//Add data props
+				for(var i = 0;i<noddes.props.typesprops[nodeTypeId].length;i++){
+					el = noddes.props.typesprops[nodeTypeId][i];
+					console.log(noddes.props.typesprops[nodeTypeId][i].propel)
+					document.getElementsByClassName("datasArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].add(el, noddes.data[nodeIndex].data[el.type])+"</div>";
+				}
+				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.props.saveProps('+nid+');" class="btn">Save</a>';
+				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.nodes.duplicateNode('+nid+');" class="btn">Duplicate</a>';
 			}
-
-			//Add node props
-			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[3].add({
-				name:"Type",
-				vars:noddes.props.types
-			},noddes.data[nodeIndex].type)+"</div>";
-
-			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[4].add({
-				name:"Color"
-			},noddes.data[nodeIndex].color)+"</div>";
-
-			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[0].add({
-				name:"Name"
-			},noddes.data[nodeIndex].name)+"</div>";
-			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[1].add({
-				name:"X",
-				unit:"px"
-			},noddes.data[nodeIndex].x)+"</div>";
-			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[1].add({
-				name:"Y",
-				unit:"px"
-			},noddes.data[nodeIndex].y)+"</div>";
-			document.getElementsByClassName("propsArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[5].add({
-				name:"Inputs"
-			},noddes.data[nodeIndex].inputs)+"</div>";
-
-			//Add data props
-			for(var i = 0;i<noddes.props.typesprops[nodeTypeId].length;i++){
-				el = noddes.props.typesprops[nodeTypeId][i];
-				console.log(noddes.props.typesprops[nodeTypeId][i].propel)
-				document.getElementsByClassName("datasArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].add(el, noddes.data[nodeIndex].data[el.type])+"</div>";
-			}
-			document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.props.saveProps('+nid+');" class="btn">Save</a>';
-			document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.nodes.duplicateNode('+nid+');" class="btn">Duplicate</a>';
 		},
 		saveProps:function(nid){
 			var nodeIndex = noddes.nodes.getIndexById(nid);
@@ -861,8 +906,17 @@ var noddes = {
 		console.log("Курсор: "+cursorType)
 	},
 	nodes:{
-		duplicateNode:function(){
-			alert("TODO Duplicate");
+		duplicateNode:function(nid, index){
+			if(index==undefined){
+				index = noddes.nodes.getIndexById(nid);
+			}
+			node = Object.create(noddes.data[index]);
+			node.id = noddes.nodes.genNewId();
+			node.x+=40;
+			node.y+=40;
+			noddes.data.push(node);
+			noddes.renderDataByIndex(noddes.data.length-1);
+			noddes.updateNode(node.id, noddes.data.length-1);
 		},
 		genNewId:function(){
 			var id = noddes.data[noddes.data.length-1].id;
@@ -872,6 +926,7 @@ var noddes = {
 			return id;
 		},
 		getIndexById:function(nid){
+			console.log("Find for "+nid);
 			for(var i = 0;i<noddes.data.length;i++){
 				if(noddes.data[i].id==nid){
 					return i;

@@ -19,9 +19,9 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 		* ~~Save Move~~
 		* ~~Remove~~
 		* ~~Add~~
-		* Duplicate
+		* ~~Duplicate~~
 	* ~~LoadData~~
-	* Rulers
+	* Rulers (?)
 * ~~Props View~~
 	* ~~Props types~~
 	* ~~Nodes Types~~
@@ -34,4 +34,4 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
  	* ~~Move Tool~~
  	* ~~Scale Tool~~
  	* ~~Add Node Tool~~
- * Menu Panel
+ * Menu Panel (?)

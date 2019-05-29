@@ -270,6 +270,12 @@ body{
 	width:available;
 }
 
+.fontListEl{
+	clear:both;
+	display:block;
+	color:#33ffff;
+}
+
 .rembtn{
 	display:block;
 	width:25px;
