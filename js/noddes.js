@@ -43,25 +43,25 @@ var noddes = {
 		node.style.background="#"+noddes.data[index].color;
 		node.innerHTML=noddes.data[index].name;
 		//node.style.transform="rotate(0deg) translate("+noddes.data[index].x+"px, "+noddes.data[index].y+"px)";
+		links = document.querySelectorAll('div.NodeLine[from-id="'+nid+'"]');
+		for(var i = 0;i<links.length;i++){
+			document.getElementsByClassName("NodesContainer")[0].removeChild(links[i]);
+		}
+
+		fromId = noddes.data[index].id;
+		fromIndex = index;
+		for(var i = 0;i<noddes.data[index].inputs.length;i++){
+			toId = noddes.data[index].inputs[i];
+			toIndex = noddes.nodes.getIndexById(toId);
+			noddes.renderLink(fromId, fromIndex, toId, toIndex);
+		}
+
 		noddes.reRenderData();
 		
 	},
-	renderDataByIndex:function(i){
-			newNode = document.createElement("div");
-			newNode.innerHTML=noddes.data[i].name;
-			newNode.style.background="#"+noddes.data[i].color;
-			newNode.className="NodeBox";
-			newNode.setAttribute("data-id", noddes.data[i].id);
-			newNode.style.transform="rotate(0deg) translate("+noddes.data[i].x+"px, "+noddes.data[i].y+"px)";
-
-			document.getElementsByClassName("NodesContainer")[0].appendChild(newNode);
-			for(var j = 0; j<noddes.data[i].inputs.length;j++){
+	renderLink:function(fromId, fromIndex, toId, toIndex){
 				newLink = document.createElement("div");
 
-				fromId=noddes.data[i].id;
-				fromIndex=i;
-				toId=noddes.data[i].inputs[j];//
-				toIndex=noddes.nodes.getIndexById(toId);
 
 				newLink.setAttribute("from-id", fromId);
 				newLink.setAttribute("to-id", toId);
@@ -85,7 +85,25 @@ var noddes = {
 				document.getElementsByClassName("NodesContainer")[0].appendChild(newLink);
 				
 				console.log("line "+noddes.data[fromIndex].name+" - "+noddes.data[toIndex].name);
-			
+		
+	},
+	renderDataByIndex:function(i){
+			newNode = document.createElement("div");
+			newNode.innerHTML=noddes.data[i].name;
+			newNode.style.background="#"+noddes.data[i].color;
+			newNode.className="NodeBox";
+			newNode.setAttribute("data-id", noddes.data[i].id);
+			newNode.style.transform="rotate(0deg) translate("+noddes.data[i].x+"px, "+noddes.data[i].y+"px)";
+
+			document.getElementsByClassName("NodesContainer")[0].appendChild(newNode);
+			for(var j = 0; j<noddes.data[i].inputs.length;j++){
+
+				fromId=noddes.data[i].id;
+				fromIndex=i;
+				toId=noddes.data[i].inputs[j];
+				toIndex=noddes.nodes.getIndexById(toId);
+
+				noddes.renderLink(fromId, fromIndex, toId, toIndex);
 			}
 	},
 	renderData:function(){//Render Data on NodeTree		
@@ -595,9 +613,9 @@ var noddes = {
 		],
 		typesprops:[//Fields of nodes types
 			[//view
-				{
+				//{
 					//
-				}
+				//}
 			],
 			[//text
 				{
@@ -660,13 +678,16 @@ var noddes = {
 			],
 			[//image
 				{
-					//
+					name: "Source",
+					type: "source",
+					def: "",
+					propel: 0
 				}
 			],
 			[//marge
-				{
+				//{
 					//
-				}
+				//}
 			]
 		],
 		propselslist:[
@@ -731,7 +752,11 @@ var noddes = {
 					return typeprop.name+": "+list;
 				},
 				get:function(fieldDOMNode){
-					//
+					res = [];
+					for(var i = 0;i<document.getElementsByClassName("nodesList")[0].children.length;i++){
+						res.push(parseInt(document.getElementsByClassName("nodesList")[0].children[i].getAttribute("data-id")));
+					}
+					return res;
 				}
 			}
 		],
@@ -801,7 +826,9 @@ var noddes = {
 			noddes.data[nodeIndex]["x"] = noddes.props.propselslist[1].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[3]);
 			//Y
 			noddes.data[nodeIndex]["y"] = noddes.props.propselslist[1].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[4]);
-			console.log("TODO SAVE INPUTS");
+			//inputs
+			noddes.data[nodeIndex]["inputs"] = noddes.props.propselslist[5].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[5]);
+			console.log("TODO UPDATE INPUTS");
 			
 			noddes.updateNode(nid, nodeIndex);
 

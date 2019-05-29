@@ -24,8 +24,8 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 	* Rulers
 * ~~Props View~~
 	* ~~Props types~~
-	* Nodes Types
-	* Save
+	* ~~Nodes Types~~
+	* ~~Save~~
 * Preview Panel
 	* View
 	* Move
