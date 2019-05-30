@@ -3,9 +3,11 @@ var noddes = {
 		console.log("Init");
 		noddes.initEvents();
 		noddes.types.checkDefaultTypes();
-		noddes.data = data;		
+		noddes.data = data;	
 		noddes.renderData();
+		noddes.render.init();
 		
+		noddes.render.renderNode(213);
 	},
 	initEvents:function(){
 		noddes.initKeyboard();
@@ -31,7 +33,6 @@ var noddes = {
 				})
 			);
 		}
-		
 	},
 	updateNode:function(nid, index){
 		if(index==undefined){
@@ -162,7 +163,7 @@ var noddes = {
 			newNode = {};
 			newNode.id = noddes.nodes.genNewId();
 			newNode.type = noddes.props.types[parseInt(document.getElementById("newNodeSelect").value)];
-			newNode.color="#aaa";
+			newNode.color="aaaaaa";
 			newNode.name=noddes.props.typesNames[parseInt(document.getElementById("newNodeSelect").value)];
 			newNode.x = noddes.states.newNode.x;
 			newNode.y = noddes.states.newNode.y;
@@ -466,17 +467,17 @@ var noddes = {
 					}
 				break;
 				case 17: // ctrl
-					if(!noddes.states.keyboardState.spkey){
+					if(!noddes.states.keyboardState.ctkey){
 						noddes.states.keyboardState.ctkey=true;
 					}
 				break;
 				case 18: // alt
-					if(!noddes.states.keyboardState.spkey){
+					if(!noddes.states.keyboardState.alkey){
 						noddes.states.keyboardState.alkey=true;
 					}
 				break;
 				case 16: // shift
-					if(!noddes.states.keyboardState.spkey){
+					if(!noddes.states.keyboardState.shkey){
 						noddes.states.keyboardState.shkey=true;
 					}
 				break;
@@ -663,7 +664,7 @@ var noddes = {
 					name: "Content",
 					type: "text",
 					def: "",//default value
-					propel: 0
+					propel: 6
 				//	min: 0,
 				//	max: 20,
 				//	...
@@ -798,6 +799,15 @@ var noddes = {
 						res.push(parseInt(document.getElementsByClassName("nodesList")[0].children[i].getAttribute("data-id")));
 					}
 					return res;
+				}
+			},
+			{//Textarea
+				add:function(typeprop, val){
+					//val = val.replace("\n","");
+					return typeprop.name+": <br><textarea>"+val+"</textarea>";
+				},
+				get:function(fieldDOMNode){
+					return fieldDOMNode.children[1].value;
 				}
 			}
 		],
@@ -947,6 +957,104 @@ var noddes = {
 					}
 				}
 			}
+			return res;
+		}
+	},
+	render:{
+		cvs:null,
+		ctx:null,
+		prc:null,
+		init:function(){
+			noddes.render.cvs = document.getElementById("PreviewContainer");
+			noddes.render.ctx = noddes.render.cvs.getContext("2d");
+		},
+		previewData:function(data){
+			noddes.render.cvs.width = data.width;
+			noddes.render.cvs.height = data.height;
+			noddes.render.ctx.putImageData(data, 0, 0);
+			//console.log(data);
+		},
+		renderText:function(node){
+			console.log(node.data);
+/*
+				valign: "center",
+				halign: "center",
+*/
+
+			var canvas = document.createElement('canvas');
+			canvas.width = node.data.width;
+			canvas.height = node.data.height;
+			noddes.render.prc = canvas.getContext("2d");
+
+			ctx = noddes.render.prc;
+			ctx.fillStyle = "#"+node.data.color;
+			ctx.font = node.data.size+"px "+node.data.font;
+
+			
+			switch(node.data.valign){
+				case "left":
+					ctx.textAlign = "left";
+					x = 0;
+					break;
+				case "center":
+					ctx.textAlign = "center";
+					x = node.data.width/2;
+					break;
+				case "right":
+					ctx.textAlign = "right";
+					x = node.data.width;
+					break;
+			}
+			texts = node.data.text.split("\n");
+			switch(node.data.halign){
+				case "top":
+					ctx.textBaseline = "top";
+					y=0;
+					for(var i = 0;i<texts.length;i++){
+						ctx.fillText(texts[i], x, y+(i*node.data.size)); 
+					}
+					break;
+				case "center":
+					ctx.textBaseline = "middle";
+					y=node.data.height/2;
+					for(var i = 0;i<texts.length;i++){
+						ctx.fillText(texts[i], x, (y-((((texts.length-1)/2-i))*node.data.size))); 
+					}
+					break;
+				case "bottom":
+					ctx.textBaseline = "bottom";
+					y=node.data.height;
+					for(var i = 0;i<texts.length;i++){
+						ctx.fillText(texts[i], x, y-((texts.length-1-i)*node.data.size)); 
+					}
+					break;
+			}
+
+			//console.log(texts);
+			data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+			return data;
+		},
+		renderNode:function(nid){
+			index = noddes.nodes.getIndexById(nid);
+			//console.log(index);
+			switch(noddes.data[index].type){
+				case "text":
+					res=noddes.render.renderText(noddes.data[index]);
+				break;
+				case "image":
+					res=noddes.render.renderImage(noddes.data[index]);
+				break;
+				case "marge":
+					res=noddes.render.renderMarge(noddes.data[index]);
+				break;
+				case "view":
+					res=noddes.render.renderView(noddes.data[index]);
+				break;
+			}
+			noddes.data[index].cache=res;
+			noddes.render.previewData(res);
+			
 			return res;
 		}
 	},
