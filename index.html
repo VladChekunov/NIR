@@ -33,7 +33,10 @@ window.onload=function(){
 			y:229,
 			//...
 			data:{
-				mode:0
+				top:"first",//first second
+				size:"second",//first, second, union, difference
+				offsetX:0,
+				offsetY:0
 			},
 			inputs:[21,213],
 			cache:null
@@ -68,9 +71,11 @@ window.onload=function(){
 			y:10,
 			//...
 			data:{
-				source: "/home/var/",
-				data: null,
-				format: "png"
+				image:{
+					source: null,
+					data: null,
+					format: null
+				}
 			},
 			inputs:[],
 			cache:null

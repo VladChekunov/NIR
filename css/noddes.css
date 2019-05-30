@@ -44,14 +44,14 @@ body{
 	display: flex;
 	position: fixed;
 	bottom: 0;
-	left: 0;
+	left: 32px;
 	-ms-flex-direction: column;
 	flex-direction: column;
 	overflow-x: hidden;
 	overflow-y: hidden;
 	transform: translateZ(0);
 	height: 50vh;
-	width: 70vw;
+	width: calc(70vw - 32px);
 	background:#cccccc;
 }
 

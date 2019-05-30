@@ -6,8 +6,6 @@ var noddes = {
 		noddes.data = data;	
 		noddes.renderData();
 		noddes.render.init();
-		
-		noddes.render.renderNode(213);
 	},
 	initEvents:function(){
 		noddes.initKeyboard();
@@ -159,6 +157,20 @@ var noddes = {
 		}
 	},
 	events:{
+		imageUploaded:function(el){//
+			//console.log);
+			file = el.files[0];
+			var reader = new FileReader();
+			reader.readAsDataURL(file);
+			//.value = el.value;
+			reader.onload = function(e){
+				if(e.target.readyState == FileReader.DONE){
+					var img = el.nextSibling.children[0];
+					img.src = e.target.result;
+					//console.log(img);
+				}
+			}
+		},
 		createnode:function(e){
 			newNode = {};
 			newNode.id = noddes.nodes.genNewId();
@@ -609,6 +621,10 @@ var noddes = {
 			result+="</select><br><a class=\"btn\" onclick=\"noddes.events.createnode();\" href=\"javascript://\">Add</a> <a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Canel</a></div>";
 			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
 		},
+		errorMsg:function(msg){
+			result = "<div class=\"modalWindow\">Ошибка: "+msg+"<br><a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Ok</a></div>";
+			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+		},
 		clearModalWindows:function(){
 			document.getElementsByClassName("popupPanel")[0].innerHTML="";
 		}
@@ -720,16 +736,45 @@ var noddes = {
 			],
 			[//image
 				{
-					name: "Source",
-					type: "source",
-					def: "",
-					propel: 0
+					name: "Image",
+					type: "image",
+					def: {
+						source: null,
+						data: null,
+						format: null
+					},
+					propel: 7
 				}
 			],
 			[//marge
-				//{
-					//
-				//}
+				{
+					name: "top",
+					type: "top",
+					vars: ["first", "second"],
+					def: "first",
+					propel: 3
+				},
+				{
+					name: "Size",
+					type: "size",
+					vars: ["first", "second", "union", "difference"],
+					def: "first",
+					propel: 3
+				},
+				{
+					name: "Offset X",
+					type: "offsetX",
+					def: 0,
+					unit: "px",
+					propel: 1
+				},
+				{
+					name: "Offset Y",
+					type: "offsetY",
+					def: 0,
+					unit: "px",
+					propel: 1
+				}
 			]
 		],
 		propselslist:[
@@ -748,7 +793,7 @@ var noddes = {
 					return typeprop.name+": <input type='number' value='"+val+"'>"+typeprop.unit;
 				},
 				get:function(fieldDOMNode){
-					return fieldDOMNode.children[0].value;
+					return parseInt(fieldDOMNode.children[0].value);
 				}
 			},
 			{//Font field
@@ -809,6 +854,47 @@ var noddes = {
 				get:function(fieldDOMNode){
 					return fieldDOMNode.children[1].value;
 				}
+			},{//Image
+				add:function(typeprop, val){
+					image="";
+					path='';
+					format='';
+					data='';
+					if(val.data!=null){
+						path=val.source;
+						format=val.format;
+						data=val.data;
+						img = new Image();
+						img.src = data;
+
+						image = "Image ("+img.width+"x"+img.height+"), "+val.format+"<br><i>"+val.source+"</i><br>";
+					}
+					return image+'NewImage: <input id="fileinput" onchange="noddes.events.imageUploaded(this)" accept="image/png, image/jpeg" type="file"><div id="newData" style="display:none"><img src="'+data+'"><input value="'+path+'"><input value="'+format+'"></div>';
+/*
+*/
+				},
+				get:function(fieldDOMNode){
+					fileinput = fieldDOMNode.querySelector("input#fileinput");
+					file = fieldDOMNode.querySelector("input#fileinput").files[0];
+					if(file==undefined && fieldDOMNode.querySelector("#newData").children[1].value==""){
+						return {source: null, data: null, format: null};
+					}else{
+						sourceData=null;
+						formatData=null;
+						dataData=null;
+						if(file==undefined){
+							dataData=fieldDOMNode.querySelector("#newData").children[0].src;
+							sourceData=fieldDOMNode.querySelector("#newData").children[1].value;
+							formatData=fieldDOMNode.querySelector("#newData").children[2].value;
+							if(sourceData==""){sourceData=null;formatData=null;dataData=null}
+						}else{
+							sourceData=fileinput.value;
+							formatData=file.type;
+							dataData=fieldDOMNode.querySelector("#newData").children[0].src;
+						}
+						return {source: sourceData, data: dataData, format: formatData}
+					}
+				}
 			}
 		],
 		
@@ -859,6 +945,7 @@ var noddes = {
 				}
 				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.props.saveProps('+nid+');" class="btn">Save</a>';
 				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.nodes.duplicateNode('+nid+');" class="btn">Duplicate</a>';
+				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.render.previewData(noddes.render.renderNode('+nid+'));" class="btn">Preview</a>';
 			}
 		},
 		saveProps:function(nid){
@@ -869,6 +956,7 @@ var noddes = {
 					nodeTypeId=i;
 				}
 			}
+			noddes.data[nodeIndex].cache=null;
 			//Type
 			noddes.data[nodeIndex]["type"] = noddes.props.propselslist[3].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[0]);
 			//Color
@@ -881,11 +969,13 @@ var noddes = {
 			noddes.data[nodeIndex]["y"] = noddes.props.propselslist[1].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[4]);
 			//inputs
 			noddes.data[nodeIndex]["inputs"] = noddes.props.propselslist[5].get(document.getElementsByClassName("propsArea")[0].getElementsByClassName("field")[5]);
+
+
 			noddes.updateNode(nid, nodeIndex);
 
 			for(var i = 0;i<noddes.props.typesprops[nodeTypeId].length;i++){
 				noddes.data[nodeIndex].data[noddes.props.typesprops[nodeTypeId][i].type] = noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].get(document.getElementsByClassName("datasArea")[0].getElementsByClassName("field")[i]);
-			}			
+			}		
 		},
 		stats:function(){
 			document.getElementsByClassName("PropsContainer")[0].innerHTML="Selected "+noddes.selected.length+" objects.";
@@ -969,18 +1059,16 @@ var noddes = {
 			noddes.render.ctx = noddes.render.cvs.getContext("2d");
 		},
 		previewData:function(data){
-			noddes.render.cvs.width = data.width;
-			noddes.render.cvs.height = data.height;
-			noddes.render.ctx.putImageData(data, 0, 0);
+			console.log(data);
+			if(data!=-1){
+				noddes.render.cvs.width = data.width;
+				noddes.render.cvs.height = data.height;
+				noddes.render.ctx.clearRect(0, 0, noddes.render.cvs.width, noddes.render.cvs.height);
+				noddes.render.ctx.putImageData(data, 0, 0);
+			}
 			//console.log(data);
 		},
 		renderText:function(node){
-			console.log(node.data);
-/*
-				valign: "center",
-				halign: "center",
-*/
-
 			var canvas = document.createElement('canvas');
 			canvas.width = node.data.width;
 			canvas.height = node.data.height;
@@ -1035,26 +1123,132 @@ var noddes = {
 
 			return data;
 		},
-		renderNode:function(nid){
-			index = noddes.nodes.getIndexById(nid);
-			//console.log(index);
-			switch(noddes.data[index].type){
-				case "text":
-					res=noddes.render.renderText(noddes.data[index]);
-				break;
-				case "image":
-					res=noddes.render.renderImage(noddes.data[index]);
-				break;
-				case "marge":
-					res=noddes.render.renderMarge(noddes.data[index]);
-				break;
-				case "view":
-					res=noddes.render.renderView(noddes.data[index]);
-				break;
+		renderImage:function(node){
+			if(node.data.image.data==null){
+				noddes.windows.errorMsg("Изображение не выбрано");
+				return -1;
 			}
-			noddes.data[index].cache=res;
-			noddes.render.previewData(res);
-			
+			img = new Image();
+			img.src=node.data.image.data;
+
+			var canvas = document.createElement('canvas');
+			noddes.render.prc = canvas.getContext("2d");
+
+			canvas.width = img.width;
+			canvas.height = img.height;
+			ctx = noddes.render.prc;
+
+			ctx.drawImage(img,0,0);
+			data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+			return data;
+		},
+		renderMarge:function(node){
+			if(node.inputs.length!=2){
+				noddes.windows.errorMsg("Выходных нод у элемента наложение должно быть 2.");
+				console.log("ERR: Выходных нод у элемента наложение должно быть 2.");
+				return -1;
+			}
+			imageA = noddes.render.renderNode(node.inputs[0]);
+			imageB = noddes.render.renderNode(node.inputs[1]);
+			if(imageA==-1 || imageB==-1){
+				console.log("ERR: Входные ноды не работают как надо.");
+				return -1;
+			}else{
+
+				console.log(imageA);
+				console.log("Aw:"+imageA.width);
+				console.log("Ah:"+imageA.height);
+				console.log("Bw:"+imageB.width);
+				console.log("Bh:"+imageB.height);
+
+
+				offsetX = node.data.offsetX;
+				offsetY = node.data.offsetY;
+				width = 0;
+				height = 0;
+				switch(node.data.size){
+					case "first":
+						width = parseInt(imageA.width)+parseInt(offsetX);
+						height = parseInt(imageA.height)+parseInt(offsetY);
+					break;
+					case "second":
+						width = parseInt(imageB.width)+parseInt(offsetX);
+						height = parseInt(imageB.height)+parseInt(offsetY);
+					break;
+					case "union":
+						if(imageB.width+offsetX>=imageA.width+offsetX){
+							width = imageB.width+offsetX
+						}else{
+							width = imageA.width+offsetX
+						}
+						if(imageB.height+offsetX>=imageA.height+offsetX){
+							width = imageB.height+offsetX
+						}else{
+							width = imageA.height+offsetX
+						}
+					break;
+					case "difference":
+						if(imageB.width-offsetX<=imageA.width-offsetX){
+							width = imageB.width-offsetX
+						}else{
+							width = imageA.width-offsetX
+						}
+						if(imageB.height-offsetX<=imageA.height-offsetX){
+							width = imageB.height-offsetX
+						}else{
+							width = imageA.height-offsetX
+						}
+					break;
+				}
+
+				var canvas = document.createElement('canvas');
+				canvas.width = width;
+				canvas.height = height;
+				noddes.render.prc = canvas.getContext("2d");
+				ctx = noddes.render.prc;
+
+				ctx.beginPath();
+				ctx.rect(0, 0, width, height);
+				ctx.fillStyle = "red";
+				ctx.fill();
+
+
+			/*
+					top:"first",//first second
+					size:"second",//first, second, union, difference
+					offsetX:0,
+					offsetY:0
+			*/
+				data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				return data;
+			}
+		},
+		renderNode:function(nid){
+			let index = noddes.nodes.getIndexById(nid);
+			//console.log("recached ["+index+"] = "+nid);
+			if(noddes.data[index].cache==null){
+				//console.log(index);
+				switch(noddes.data[index].type){
+					case "text":
+						res=noddes.render.renderText(noddes.data[index]);
+					break;
+					case "image":
+						res=noddes.render.renderImage(noddes.data[index]);
+					break;
+					case "marge":
+						res=noddes.render.renderMarge(noddes.data[index]);
+					break;
+					case "view":
+						res=noddes.render.renderView(noddes.data[index]);
+					break;
+				}
+				
+				noddes.data[index].cache=res;
+			}else{
+				res = noddes.data[index].cache;
+			}
+			//noddes.render.previewData(res);
 			return res;
 		}
 	},
