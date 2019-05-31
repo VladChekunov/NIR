@@ -671,9 +671,19 @@ var noddes = {
 		],
 		typesprops:[//Fields of nodes types
 			[//view
-				//{
-					//
-				//}
+				{
+					name: "Scale",
+					type: "scale",
+					unit: "%",
+					def: 100,
+					propel: 1
+				},
+				{
+					name: "Target",
+					type: "isTarget",
+					def: false,
+					propel: 8
+				}
 			],
 			[//text
 				{
@@ -895,6 +905,28 @@ var noddes = {
 						return {source: sourceData, data: dataData, format: formatData}
 					}
 				}
+			},{//Checkbox
+				add:function(typeprop, val){
+					if(val){
+						return typeprop.name+': <input type="checkbox" checked=true>';
+					}else{
+						return typeprop.name+': <input type="checkbox">';
+					}
+				},
+				get:function(fieldDOMNode){
+					res = fieldDOMNode.querySelector("input").checked;
+					console.log(res);
+					if(res){
+						noddes.render.clearTarget();
+						noddes.render.target = parseInt(noddes.selected[0].id);
+						return true;
+					}else{
+						if(parseInt(noddes.selected[0].id) == noddes.render.target){
+							noddes.render.clearTarget();
+						}
+						return false;
+					}
+				}			
 			}
 		],
 		
@@ -1054,9 +1086,30 @@ var noddes = {
 		cvs:null,
 		ctx:null,
 		prc:null,
+		target:-1,
+		forceRedraw:true,
 		init:function(){
 			noddes.render.cvs = document.getElementById("PreviewContainer");
 			noddes.render.ctx = noddes.render.cvs.getContext("2d");
+		},
+		clearTarget:function(){
+			noddes.render.target = -1;
+			for(var i=0;i<noddes.data.length;i++){
+				if(noddes.data[i].type=="view"){
+					if(noddes.data[i].data.isTarget==true){
+						noddes.data[i].data.isTarget=false;
+						break;
+					}
+				}
+			}
+			
+		},
+		getScale:function(){
+			if(noddes.render.target!=-1){
+				return (noddes.data[noddes.nodes.getIndexById(noddes.render.target)].data.scale/100);
+			}else{
+				return 1;
+			}
 		},
 		previewData:function(data){
 			console.log(data);
@@ -1069,14 +1122,16 @@ var noddes = {
 			//console.log(data);
 		},
 		renderText:function(node){
+			scale = noddes.render.getScale();
+
 			var canvas = document.createElement('canvas');
-			canvas.width = node.data.width;
-			canvas.height = node.data.height;
+			canvas.width = node.data.width*scale;
+			canvas.height = node.data.height*scale;
 			noddes.render.prc = canvas.getContext("2d");
 
 			ctx = noddes.render.prc;
 			ctx.fillStyle = "#"+node.data.color;
-			ctx.font = node.data.size+"px "+node.data.font;
+			ctx.font = parseInt(node.data.size)*scale+"px "+node.data.font;
 
 			
 			switch(node.data.valign){
@@ -1086,11 +1141,11 @@ var noddes = {
 					break;
 				case "center":
 					ctx.textAlign = "center";
-					x = node.data.width/2;
+					x = (node.data.width/2)*scale;
 					break;
 				case "right":
 					ctx.textAlign = "right";
-					x = node.data.width;
+					x = node.data.width*scale;
 					break;
 			}
 			texts = node.data.text.split("\n");
@@ -1099,26 +1154,28 @@ var noddes = {
 					ctx.textBaseline = "top";
 					y=0;
 					for(var i = 0;i<texts.length;i++){
-						ctx.fillText(texts[i], x, y+(i*node.data.size)); 
+						ctx.fillText(texts[i], x, y+(i*node.data.size*scale)); 
 					}
 					break;
 				case "center":
 					ctx.textBaseline = "middle";
-					y=node.data.height/2;
+					y=(node.data.height/2)*scale;
 					for(var i = 0;i<texts.length;i++){
-						ctx.fillText(texts[i], x, (y-((((texts.length-1)/2-i))*node.data.size))); 
+						ctx.fillText(texts[i], x, (y-((((texts.length-1)/2-i))*node.data.size*scale))); 
 					}
 					break;
 				case "bottom":
 					ctx.textBaseline = "bottom";
-					y=node.data.height;
+					y=node.data.height*scale;
 					for(var i = 0;i<texts.length;i++){
-						ctx.fillText(texts[i], x, y-((texts.length-1-i)*node.data.size)); 
+						ctx.fillText(texts[i], x, y-((texts.length-1-i)*node.data.size*scale)); 
 					}
 					break;
 			}
 
-			//console.log(texts);
+			console.log(canvas.width);
+			console.log(canvas.height);
+
 			data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 			return data;
@@ -1128,17 +1185,19 @@ var noddes = {
 				noddes.windows.errorMsg("Изображение не выбрано");
 				return -1;
 			}
+			scale = noddes.render.getScale();
+
 			img = new Image();
 			img.src=node.data.image.data;
 
 			var canvas = document.createElement('canvas');
 			noddes.render.prc = canvas.getContext("2d");
 
-			canvas.width = img.width;
-			canvas.height = img.height;
+			canvas.width = img.width*scale;
+			canvas.height = img.height*scale;
 			ctx = noddes.render.prc;
 
-			ctx.drawImage(img,0,0);
+			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 			data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 			return data;
@@ -1169,49 +1228,76 @@ var noddes = {
 				height = 0;
 				switch(node.data.size){
 					case "first":
-						width = parseInt(imageA.width)+parseInt(offsetX);
-						height = parseInt(imageA.height)+parseInt(offsetY);
+						width = imageA.width+offsetX;
+						height = imageA.height+offsetY;
 					break;
 					case "second":
 						width = parseInt(imageB.width)+parseInt(offsetX);
 						height = parseInt(imageB.height)+parseInt(offsetY);
 					break;
-					case "union":
+					case "union"://FIX THIS TODOOOOOOOOO
 						if(imageB.width+offsetX>=imageA.width+offsetX){
-							width = imageB.width+offsetX
+							width = imageB.width+offsetX;
 						}else{
-							width = imageA.width+offsetX
+							width = imageA.width+offsetX;
 						}
-						if(imageB.height+offsetX>=imageA.height+offsetX){
-							width = imageB.height+offsetX
+						if(imageB.height+offsetY>=imageA.height+offsetY){
+							height = imageB.height+offsetY;
 						}else{
-							width = imageA.height+offsetX
+							height = imageA.height+offsetY;
 						}
 					break;
 					case "difference":
-						if(imageB.width-offsetX<=imageA.width-offsetX){
-							width = imageB.width-offsetX
+						if((imageB.width-offsetX)<=(imageA.width-offsetX)){
+							width = imageB.width-offsetX;
 						}else{
-							width = imageA.width-offsetX
+							width = imageA.width-offsetX;
 						}
-						if(imageB.height-offsetX<=imageA.height-offsetX){
-							width = imageB.height-offsetX
+						if((imageB.height-offsetY)<=(imageA.height-offsetY)){
+							height = imageB.height-offsetY;
 						}else{
-							width = imageA.height-offsetX
+							height = imageA.height-offsetY;
 						}
 					break;
 				}
-
+				if(width==0){
+					noddes.windows.errorMsg("Ширина слишком маленькая.");
+					return -1;
+				}
+				if(height==0){
+					noddes.windows.errorMsg("Высота слишком маленькая.");
+					return -1;
+				}
+				console.log("w:"+width+", h:"+height);
 				var canvas = document.createElement('canvas');
 				canvas.width = width;
 				canvas.height = height;
 				noddes.render.prc = canvas.getContext("2d");
 				ctx = noddes.render.prc;
 
-				ctx.beginPath();
-				ctx.rect(0, 0, width, height);
-				ctx.fillStyle = "red";
-				ctx.fill();
+        			var cvs2=document.createElement("canvas");
+        			cvs2.width=width;
+        			cvs2.height=height;
+        			var ctx2=cvs2.getContext("2d");
+
+
+				ctx.putImageData(imageA, offsetX, offsetY);
+				ctx2.putImageData(imageB,0,0);
+
+				switch(node.data.top){
+					case "first":
+						ctx.drawImage(cvs2,0,0);
+					break;
+					case "second":
+						ctx2.drawImage(canvas,0,0);
+						ctx = ctx2;
+					break;
+				}
+
+				//ctx.beginPath();
+				//ctx.rect(0, 0, width, height);
+				//ctx.fillStyle = "red";
+				//ctx.fill();
 
 
 			/*
@@ -1224,10 +1310,18 @@ var noddes = {
 				return data;
 			}
 		},
+		renderView:function(node){
+			if(node.inputs.length!=1){
+				noddes.windows.errorMsg("Входных нод у ноды предпросмотра должно быть 1.");
+				return -1;
+			}
+			input = noddes.render.renderNode(node.inputs[0]);
+			return input;
+		},
 		renderNode:function(nid){
 			let index = noddes.nodes.getIndexById(nid);
 			//console.log("recached ["+index+"] = "+nid);
-			if(noddes.data[index].cache==null){
+			if(noddes.data[index].cache==null || noddes.render.forceRedraw){
 				//console.log(index);
 				switch(noddes.data[index].type){
 					case "text":
