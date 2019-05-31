@@ -1043,6 +1043,10 @@ var noddes = {
 				index = noddes.nodes.getIndexById(nid);
 			}
 			node = Object.create(noddes.data[index]);
+			node.data = Object.create(noddes.data[index].data);
+			if(noddes.data[index].type=="image"){
+				node.data.image = Object.create(noddes.data[index].data.image);
+			}
 			node.id = noddes.nodes.genNewId();
 			node.x+=40;
 			node.y+=40;
@@ -1215,7 +1219,8 @@ var noddes = {
 				return -1;
 			}else{
 
-				console.log(imageA);
+				console.log("A:"+node.inputs[0]+", B:"+node.inputs[1]);
+
 				console.log("Aw:"+imageA.width);
 				console.log("Ah:"+imageA.height);
 				console.log("Bw:"+imageB.width);
