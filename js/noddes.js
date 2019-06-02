@@ -3,7 +3,8 @@ var noddes = {
 		console.log("Init");
 		noddes.initEvents();
 		noddes.types.checkDefaultTypes();
-		noddes.data = data;	
+		noddes.data = data;
+		//noddes.data = JSON.parse("[{\"id\":0,\"type\":\"view\",\"color\":\"ff0000\",\"name\":\"View Node\",\"x\":422,\"y\":399,\"data\":{\"scale\":100,\"isTarget\":false},\"inputs\":[24],\"cache\":{}},{\"id\":22,\"type\":\"marge\",\"color\":\"fff000\",\"name\":\"marge\",\"x\":358,\"y\":192,\"data\":{\"top\":\"first\",\"size\":\"union\",\"offsetX\":120,\"offsetY\":0},\"inputs\":[21,213],\"cache\":{}},{\"id\":213,\"type\":\"text\",\"color\":\"fff000\",\"name\":\"Sample Text Node\",\"x\":270,\"y\":34,\"data\":{\"text\":\"Sample\\nText\\nRendering\",\"font\":\"Arial\",\"valign\":\"center\",\"halign\":\"center\",\"width\":120,\"height\":120,\"color\":\"000000\",\"size\":20},\"inputs\":[],\"cache\":{}},{\"id\":21,\"type\":\"image\",\"color\":\"fff000\",\"name\":\"Sample Image\",\"x\":635,\"y\":10,\"data\":{\"image\":{\"source\":\"C:\\\\fakepath\\\\ddddd.png\",\"data\":\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4wYCCwsvPT311AAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAsElEQVR42u3QQREAAAQAMATRvyUpnM8WYTnRwb1SIFo0okWLRrRoRIsWjWjRiBYtGtGiES1aNKJFI1q0aESLRrRo0YgWjWjRohEtGtGiRSNaNKJFi0a0aESLFo1o0YgWLRrRohEtWjSiRSNatGhEi0a0aNGIFo1o0aIRLRrRokUjWjSiRYtGtGhEixaNaNGIFi0a0aIRLVo0okUjWrRoRItGtGjRiBaNaNGiES0a0f8WbSsCDfJ75mQAAAAASUVORK5CYII=\",\"format\":\"image/png\"}},\"inputs\":[],\"cache\":{}},{\"data\":{\"top\":\"first\",\"size\":\"union\",\"offsetX\":120,\"offsetY\":0},\"id\":23,\"x\":545,\"y\":190,\"cache\":{},\"type\":\"marge\",\"color\":\"fff000\",\"name\":\"marge\",\"inputs\":[213,21]},{\"id\":24,\"type\":\"marge\",\"color\":\"aaaaaa\",\"name\":\"Marge Node\",\"x\":455,\"y\":287,\"inputs\":[22,23],\"cache\":{},\"data\":{\"top\":\"first\",\"size\":\"union\",\"offsetX\":0,\"offsetY\":120}}]");
 		noddes.renderData();
 		noddes.render.init();
 	},
@@ -1212,8 +1213,8 @@ var noddes = {
 				console.log("ERR: Выходных нод у элемента наложение должно быть 2.");
 				return -1;
 			}
-			imageA = noddes.render.renderNode(node.inputs[0]);
-			imageB = noddes.render.renderNode(node.inputs[1]);
+			let imageA = noddes.render.renderNode(node.inputs[0]);
+			let imageB = noddes.render.renderNode(node.inputs[1]);
 			if(imageA==-1 || imageB==-1){
 				console.log("ERR: Входные ноды не работают как надо.");
 				return -1;
@@ -1227,8 +1228,10 @@ var noddes = {
 				console.log("Bh:"+imageB.height);
 
 
-				offsetX = node.data.offsetX;
-				offsetY = node.data.offsetY;
+				let offsetX = node.data.offsetX;
+				let offsetY = node.data.offsetY;
+
+
 				width = 0;
 				height = 0;
 				switch(node.data.size){
@@ -1241,12 +1244,14 @@ var noddes = {
 						height = parseInt(imageB.height)+parseInt(offsetY);
 					break;
 					case "union"://FIX THIS TODOOOOOOOOO
+						console.log((height = imageA.height+offsetY)+"ЖЖЖЖЖ");
+
 						if(imageB.width+offsetX>=imageA.width+offsetX){
 							width = imageB.width+offsetX;
 						}else{
 							width = imageA.width+offsetX;
 						}
-						if(imageB.height+offsetY>=imageA.height+offsetY){
+						if(imageB.height+offsetY>imageA.height+offsetY){
 							height = imageB.height+offsetY;
 						}else{
 							height = imageA.height+offsetY;
@@ -1326,20 +1331,25 @@ var noddes = {
 		renderNode:function(nid){
 			let index = noddes.nodes.getIndexById(nid);
 			//console.log("recached ["+index+"] = "+nid);
+			var res;
 			if(noddes.data[index].cache==null || noddes.render.forceRedraw){
 				//console.log(index);
 				switch(noddes.data[index].type){
 					case "text":
 						res=noddes.render.renderText(noddes.data[index]);
+						//console.log("Записали текст в "+nid);
 					break;
 					case "image":
 						res=noddes.render.renderImage(noddes.data[index]);
+						//console.log("Записали изображение в "+nid);
 					break;
 					case "marge":
 						res=noddes.render.renderMarge(noddes.data[index]);
+						//console.log("Записали рез объединения в "+nid);
 					break;
 					case "view":
 						res=noddes.render.renderView(noddes.data[index]);
+						//console.log("Записали предпросмотр в "+nid);
 					break;
 				}
 				
