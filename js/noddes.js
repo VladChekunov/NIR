@@ -566,17 +566,70 @@ var noddes = {
 			r=col[1];
 			g=col[2];
 			b=col[3];
-			result = "<div style=\"position:absolute;width:25vw;right:auto;top:"+y+"px;left:"+x+"px;\" class=\"modalWindow\"><span>Select color:</span><br><input class=\"colorPickerRed\" type=\"number\" value=\""+r+"\"><br><input class=\"colorPickerGreen\" type=\"number\" value=\""+g+"\"><br><input class=\"colorPickerBlue\" type=\"number\" value=\""+b+"\"><br></div>";
+			result = "<div style=\"position:absolute;width:200px;right:auto;top:"+y+"px;left:"+x+"px;\" class=\"modalWindow\"><span>Select color:</span><br></div>";
+
 			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+
+			var colorPreview = document.createElement("div");
+			colorPreview.className = "colorPreview";
+			var oldColor = document.createElement("div");
+			oldColor.style.background = pp.style.backgroundColor;
+			var newColor = document.createElement("div");
+			newColor.style.background = pp.style.backgroundColor;
+
+			var redColor = document.createElement("input");
+			redColor.className = "colorPickerRed";
+			redColor.type = "number";
+			redColor.max = 255;
+			redColor.value = r;
+
+			var greenColor = document.createElement("input");
+			greenColor.className = "colorPickerGreen";
+			greenColor.type = "number";
+			greenColor.max = 255;
+			greenColor.value = g;
+
+			var blueColor = document.createElement("input");
+			blueColor.className = "colorPickerBlue";
+			blueColor.type = "number";
+			blueColor.max = 255;
+			blueColor.value = b;
+			document.getElementsByClassName("modalWindow")[0].appendChild(document.createTextNode("R: "));
+			document.getElementsByClassName("modalWindow")[0].appendChild(redColor);
+			document.getElementsByClassName("modalWindow")[0].appendChild(document.createTextNode("G: "));
+			document.getElementsByClassName("modalWindow")[0].appendChild(greenColor);
+			document.getElementsByClassName("modalWindow")[0].appendChild(document.createTextNode("B: "));
+			document.getElementsByClassName("modalWindow")[0].appendChild(blueColor);
+
+			changeColor=function(){
+				newColor.style.background = "rgb("+redColor.value+", "+greenColor.value+", "+blueColor.value+")";
+			}
+			redColor.onchange=changeColor;
+			greenColor.onchange=changeColor;
+			blueColor.onchange=changeColor;
+
+			colorPreview.appendChild(oldColor);
+			colorPreview.appendChild(newColor);
+
+			document.getElementsByClassName("modalWindow")[0].appendChild(colorPreview);
+
 			var a = document.createElement("a");
 			document.getElementsByClassName("modalWindow")[0].appendChild(a);
-			a.innerHTML="Save";
+			a.innerHTML="Change";
 			a.href="javascript://";
 			a.className="btn";
 			a.onclick=function(){
 				pp.style.backgroundColor = "#"+noddes.colors.rgbToHex("rgb("+document.getElementsByClassName("colorPickerRed")[0].value+", "+document.getElementsByClassName("colorPickerGreen")[0].value+", "+document.getElementsByClassName("colorPickerBlue")[0].value+")");
 				noddes.windows.clearModalWindows();
 			}
+
+			var c = document.createElement("a");
+			document.getElementsByClassName("modalWindow")[0].appendChild(c);
+			c.innerHTML="Cancel";
+			c.href="javascript://";
+			c.className="btn";
+			c.onclick=function(){noddes.windows.clearModalWindows();}
+			noddes.windows.makeWindowDraggable(document.getElementsByClassName("popupPanel")[0].children[0], false);
 			
 		},
 		showSelectFontWin:function(x,y,pp){
@@ -592,8 +645,9 @@ var noddes = {
 					pp.value = this.innerHTML;
 					noddes.windows.clearModalWindows();
 				}
-				//result += noddes.types.typesList[i]+"<br>";
 			}
+			document.getElementsByClassName("popupPanel")[0].querySelector(".modalWindow").innerHTML += "<a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Cancel</a>";
+			noddes.windows.makeWindowDraggable(document.getElementsByClassName("popupPanel")[0].children[0], false);
 			
 		},
 		getElementHTML:function(nid){
@@ -611,20 +665,56 @@ var noddes = {
 			for(var i = 0;i<noddes.data.length;i++){
 				result += "<a class='nodeListEl' onclick='noddes.windows.changeElement("+noddes.data[i].id+")' href='javascript://'>"+noddes.data[i].name+"</a>";
 			}
+			result += "<a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Cancel</a>";
 			result += "</div>";
 			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+			noddes.windows.makeWindowDraggable(document.getElementsByClassName("popupPanel")[0].children[0], true);
+		},
+		makeWindowDraggable:function(windowNode, isCenter){
+			var draggable = document.createElement("div");
+			draggable.className="draggableZone";
+			draggable.innerHTML="<i class=\"fas fa-grip-vertical\"></i>";
+			draggable.onmousedown=function(e){
+				var pos = [0, 0, 0, 0];
+				e.preventDefault();
+				pos[0] = e.clientX;
+				pos[1] = e.clientY;
+				draggable.onmousemove=function(e){
+					e.preventDefault();
+					pos[2] = pos[0] - e.clientX;
+					pos[3] = pos[1] - e.clientY;
+					pos[0] = e.clientX;
+					pos[1] = e.clientY;
+					windowNode.style.left = (windowNode.offsetLeft - pos[2])+"px";
+					windowNode.style.top = (windowNode.offsetTop - pos[3])+"px";
+				}
+				draggable.onmouseup=function(){
+					draggable.onmousemove = null;
+					draggable.onmouseup = null;
+				}
+			}
+			if(isCenter){
+				windowNode.style.position="absolute";
+				windowNode.style.margin="inherit";
+				windowNode.style.left=((window.innerWidth/2)-(windowNode.clientWidth/2))+"px";
+				windowNode.style.top=((window.innerHeight/2)-(windowNode.clientHeight/2)-60)+"px";
+			}
+			//windowNode.appendChild(draggable);
+			windowNode.insertBefore(draggable, windowNode.firstChild);
 		},
 		addNewNodeWindow:function(){
 			result = "<div class=\"modalWindow\">New Node<br><select id=\"newNodeSelect\">";
 			for(var i = 0;i<noddes.props.types.length;i++){
 				result+="<option value=\""+i+"\">"+noddes.props.typesNames[i]+"</option>";
 			}
-			result+="</select><br><a class=\"btn\" onclick=\"noddes.events.createnode();\" href=\"javascript://\">Add</a> <a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Canel</a></div>";
+			result+="</select><br><a class=\"btn\" onclick=\"noddes.events.createnode();\" href=\"javascript://\">Add</a> <a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Cancel</a></div>";
 			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+			noddes.windows.makeWindowDraggable(document.getElementsByClassName("popupPanel")[0].children[0], true);
 		},
 		errorMsg:function(msg){
 			result = "<div class=\"modalWindow\">Ошибка: "+msg+"<br><a class=\"btn\" onclick=\"noddes.windows.clearModalWindows()\" href=\"javascript://\">Ok</a></div>";
 			document.getElementsByClassName("popupPanel")[0].innerHTML=result;
+			noddes.windows.makeWindowDraggable(document.getElementsByClassName("popupPanel")[0].children[0], true);
 		},
 		clearModalWindows:function(){
 			document.getElementsByClassName("popupPanel")[0].innerHTML="";
@@ -638,7 +728,7 @@ var noddes = {
 		},
 		selectColor:function(o){
 			offsets = o.getBoundingClientRect();;
-			noddes.windows.showSelectColorWin(Math.floor(offsets.left)-window.innerWidth/4, Math.floor(offsets.top)+24, o);
+			noddes.windows.showSelectColorWin(Math.floor(offsets.left)-200, Math.floor(offsets.top)+24, o);
 		}
 	},
 	props:{
@@ -662,13 +752,15 @@ var noddes = {
 			"view",
 			"text",
 			"image",
-			"marge"
+			"marge",
+			"scale"
 		],
 		typesNames:[
 			"View Node",
 			"Text Node",
 			"Image Node",
-			"Marge Node"
+			"Marge Node",
+			"Scale Node"
 		],
 		typesprops:[//Fields of nodes types
 			[//view
@@ -786,6 +878,22 @@ var noddes = {
 					unit: "px",
 					propel: 1
 				}
+			],
+			[//scale
+				{
+					name: "Width",
+					type: "width",
+					def: 100,
+					unit: "px",
+					propel: 1
+				},
+				{
+					name: "Height",
+					type: "height",
+					def: 100,
+					unit: "px",
+					propel: 1
+				}
 			]
 		],
 		propselslist:[
@@ -875,7 +983,7 @@ var noddes = {
 						path=val.source;
 						format=val.format;
 						data=val.data;
-						img = new Image();
+						var img = new Image();
 						img.src = data;
 
 						image = "Image ("+img.width+"x"+img.height+"), "+val.format+"<br><i>"+val.source+"</i><br>";
@@ -979,6 +1087,9 @@ var noddes = {
 				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.props.saveProps('+nid+');" class="btn">Save</a>';
 				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.nodes.duplicateNode('+nid+');" class="btn">Duplicate</a>';
 				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.render.previewData(noddes.render.renderNode('+nid+'));" class="btn">Preview</a>';
+				if(noddes.data[nodeIndex].type=="view"){
+					document.getElementsByClassName("PropsContainer")[0].innerHTML+='<br><a href="javascript://" onclick="noddes.render.saveAsImage('+nid+');" class="btn">Save as Image</a>';
+				}
 			}
 		},
 		saveProps:function(nid){
@@ -1015,6 +1126,7 @@ var noddes = {
 		},
 		clear:function(){
 			document.getElementsByClassName("PropsContainer")[0].innerHTML="Nothing selected.";
+			noddes.windows.clearModalWindows();
 		}
 	},
 	tools:{
@@ -1116,6 +1228,12 @@ var noddes = {
 				return 1;
 			}
 		},
+		saveAsImage:function(nid){
+			img = noddes.render.imageDataToImage(noddes.render.renderNode(nid));
+			//alert();
+			//window.open(img.src, "_blank");
+			noddes.render.saveBase64AsFile(img.src, "File.png");
+		},
 		previewData:function(data){
 			console.log(data);
 			if(data!=-1){
@@ -1125,6 +1243,57 @@ var noddes = {
 				noddes.render.ctx.putImageData(data, 0, 0);
 			}
 			//console.log(data);
+		},
+		saveBase64AsFile(base64, fileName) {
+			var link = document.createElement("a");
+			link.setAttribute("href", base64);
+			link.setAttribute("download", fileName);
+			document.body.appendChild(link);
+			link.click();
+			setTimeout(function() {
+				document.body.removeChild(link);
+				//window.URL.revokeObjectURL(url); 
+			}, 0); 
+		},
+		imageDataToImage:function(imagedata){
+			var canvas = document.createElement('canvas');
+			var ctx = canvas.getContext('2d');
+			canvas.width = imagedata.width;
+			canvas.height = imagedata.height;
+			ctx.putImageData(imagedata, 0, 0);
+
+			var image = new Image();
+			image.src = canvas.toDataURL();
+			//image.onload=function(){
+			//	resolve(image);
+			//}
+
+			return image;
+			/*new Promise(function(){
+			});*/
+			//return image;
+		},
+		renderScale:function(node){
+			if(node.inputs.length!=1){
+				noddes.windows.errorMsg("Please, select one input node.");
+				return -1;
+			}
+
+			var source = noddes.render.imageDataToImage(noddes.render.renderNode(node.inputs[0]));
+
+			var canvas = document.createElement('canvas');
+			noddes.render.prc = canvas.getContext("2d");
+
+			canvas.width = node.data.width
+			canvas.height = node.data.height
+			ctx = noddes.render.prc;
+
+			//window.open(source.src,"_blank");
+
+			ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+			data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+			return data;
 		},
 		renderText:function(node){
 			scale = noddes.render.getScale();
@@ -1192,7 +1361,7 @@ var noddes = {
 			}
 			scale = noddes.render.getScale();
 
-			img = new Image();
+			var img = new Image();
 			img.src=node.data.image.data;
 
 			var canvas = document.createElement('canvas');
@@ -1350,6 +1519,10 @@ var noddes = {
 					case "view":
 						res=noddes.render.renderView(noddes.data[index]);
 						//console.log("Записали предпросмотр в "+nid);
+					break;
+					case "scale":
+						res=noddes.render.renderScale(noddes.data[index]);
+						//console.log("Записали изменение размера в "+nid);
 					break;
 				}
 				

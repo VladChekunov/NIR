@@ -27,7 +27,7 @@ Latest version [here](https://vladchekunov.github.io/NIR/).
 	* ~~Nodes Types~~
 	* ~~Save~~
 * Preview Panel
-	* View
+	* ~~View~~
 	* Move
 	* Scale
  * ~~Tools Panel~~

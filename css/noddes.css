@@ -22,7 +22,8 @@ body{
 	transform: translateZ(0);
 	height: 100vh;
 	width: 30vw;
-	background-color:#888888;
+	background-color: #eeeeee;
+	padding: 10px;
 }
 
 .NodesPanelWrapper{
@@ -203,7 +204,7 @@ body{
 }
 
 .modalWindow{
-	background:#333;
+	background:#eeeeee;
 	width: -moz-fit-content;
 	width: -webkit-fit-content;
 	width: fit-content;
@@ -273,7 +274,8 @@ body{
 .fontListEl{
 	clear:both;
 	display:block;
-	color:#33ffff;
+	color: #333;
+	text-decoration: none;
 }
 
 .rembtn{
@@ -303,4 +305,32 @@ body{
 	padding-left: 4px;
 	padding-right: 4px;
 	color: #fff;
+}
+
+.colorPreview{
+	display: block;
+	width: 140px;
+	height: 140px;
+	border: #aaa solid 1px;
+	left: 0;
+	right: 0;
+	margin: auto;
+}
+.colorPreview div{
+	display: block;
+	width: 140px;
+	height: 70px;
+}
+
+.draggableZone{
+	background: #dddddd;
+	width: 100%;
+	height: 20px;
+	margin-bottom:10px;
+	cursor: grab;
+}
+
+.draggableZone i{
+    color: #888;
+    font-size: 14px;
 }
