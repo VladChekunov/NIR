@@ -1090,7 +1090,7 @@ var noddes = {
 					console.log(noddes.props.typesprops[nodeTypeId][i].propel)
 					document.getElementsByClassName("datasArea")[0].innerHTML+="<div class='field'>"+noddes.props.propselslist[noddes.props.typesprops[nodeTypeId][i].propel].add(el, noddes.data[nodeIndex].data[el.type])+"</div>";
 				}
-				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.props.saveProps('+nid+');" class="btn">Save</a>';
+				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.props.saveProps('+nid+');" class="btn">Apply</a>';
 				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.nodes.duplicateNode('+nid+');" class="btn">Duplicate</a>';
 				document.getElementsByClassName("PropsContainer")[0].innerHTML+='<a href="javascript://" onclick="noddes.render.previewData(noddes.render.renderNode('+nid+'));" class="btn">Preview</a>';
 				if(noddes.data[nodeIndex].type=="view"){

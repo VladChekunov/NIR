@@ -334,3 +334,8 @@ body{
     color: #888;
     font-size: 14px;
 }
+
+.field{
+	margin-top:5px;
+	margin-bottom:5px;
+}
