@@ -594,12 +594,18 @@ var noddes = {
 			blueColor.type = "number";
 			blueColor.max = 255;
 			blueColor.value = b;
+
 			document.getElementsByClassName("modalWindow")[0].appendChild(document.createTextNode("R: "));
 			document.getElementsByClassName("modalWindow")[0].appendChild(redColor);
+			document.getElementsByClassName("modalWindow")[0].appendChild(document.createElement("br"));
+
 			document.getElementsByClassName("modalWindow")[0].appendChild(document.createTextNode("G: "));
 			document.getElementsByClassName("modalWindow")[0].appendChild(greenColor);
+			document.getElementsByClassName("modalWindow")[0].appendChild(document.createElement("br"));
+
 			document.getElementsByClassName("modalWindow")[0].appendChild(document.createTextNode("B: "));
 			document.getElementsByClassName("modalWindow")[0].appendChild(blueColor);
+			document.getElementsByClassName("modalWindow")[0].appendChild(document.createElement("br"));
 
 			changeColor=function(){
 				newColor.style.background = "rgb("+redColor.value+", "+greenColor.value+", "+blueColor.value+")";
